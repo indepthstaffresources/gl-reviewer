@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>General Ledger Reviewer | Indepth Accounting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<style>
+/* ===== Indepth staff tools app shell ===== */
+.ix-homebtn{display:inline-flex;align-items:center;gap:8px;font:600 13px var(--ix-font);color:var(--ix-deep);background:var(--ix-card);border:1px solid var(--ix-line);border-radius:10px;padding:9px 16px;text-decoration:none;box-shadow:0 1px 2px rgba(65,64,66,.05);transition:transform .15s,box-shadow .15s,border-color .15s}
+.ix-homebtn:hover{transform:translateY(-1px);border-color:var(--ix-sage);box-shadow:0 6px 16px rgba(65,64,66,.1)}
+.ix-homebtn:focus-visible{outline:none;box-shadow:0 0 0 4px var(--ix-ring)}
+
+:root{--ix-sage:#94B6AB;--ix-deep:#56776C;--ix-deeper:#4A675D;--ix-ink:#414042;--ix-bg:#F2F6F4;--ix-card:#FFFFFF;--ix-line:#DCE6E2;--ix-muted:#5F6664;--ix-tint:#E8F0EC;--ix-ring:rgba(148,182,171,.55);
+  --ix-shadow:0 1px 2px rgba(65,64,66,.06),0 8px 28px rgba(65,64,66,.07);--ix-font:Montserrat,"Century Gothic",Arial,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ix-bg:#2B2A2C;--ix-card:#363537;--ix-line:#4A4A4D;--ix-muted:#BFC5C3;--ix-ink:#ECEFEE;--ix-tint:#3E4744;--ix-deep:#A9C7BD;--ix-shadow:0 1px 2px rgba(0,0,0,.3),0 8px 28px rgba(0,0,0,.25)}}
+html,body{margin:0;min-height:100%}
+body.ix{background:var(--ix-bg)!important;color:var(--ix-ink);font-family:var(--ix-font)!important;-webkit-font-smoothing:antialiased}
+.ix-app{display:flex;min-height:100vh}
+.ix-side{position:sticky;top:0;height:100vh;flex:0 0 248px;background:#56776C;color:#fff;display:flex;flex-direction:column;padding:26px 16px 20px;box-sizing:border-box;z-index:5}
+.ix-brand{display:block;padding:0 10px 30px}
+.ix-brand img{height:30px;width:auto;display:block}
+.ix-links{display:flex;flex-direction:column;gap:3px}
+.ix-group{font-size:11px;font-weight:600;color:rgba(255,255,255,.62);letter-spacing:.06em;margin:20px 12px 6px}
+.ix-link{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.9);text-decoration:none;font-size:14px;font-weight:500;padding:10px 12px;border-radius:10px;transition:background .15s,color .15s}
+.ix-link:hover{background:rgba(255,255,255,.1);color:#fff}
+.ix-link[aria-current="page"]{background:#fff;color:#56776C;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.ix-link:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.ix-foot{margin-top:auto;font-size:11.5px;line-height:1.5;color:rgba(255,255,255,.6);padding:16px 12px 0;border-top:1px solid rgba(255,255,255,.18)}
+.ix-main{flex:1;min-width:0;display:flex;flex-direction:column}
+header.ix-top,.ix-top{background:transparent!important;color:var(--ix-ink)!important;border:0!important;box-shadow:none!important;position:static!important;margin:0!important}
+.ix-top h1,.ix-top .ix-h1{border:0!important;padding:0!important;text-transform:none!important;letter-spacing:-.01em!important}
+.ix-top img{display:none}
+.ix-top{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:26px 40px 8px;max-width:1320px;width:100%;box-sizing:border-box}
+.ix-h1{margin:0;font:600 24px/1.25 var(--ix-font);color:var(--ix-ink);letter-spacing:-.01em}
+.ix-sub{margin:4px 0 0;font-size:14px;color:var(--ix-muted);max-width:70ch}
+.ix-slot{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.ix-card{background:var(--ix-card);border-radius:16px;box-shadow:var(--ix-shadow);border:1px solid var(--ix-line)}
+@media (prefers-reduced-motion:no-preference){.ix-main>*{animation:ixIn .45s cubic-bezier(.2,.7,.2,1) both}.ix-main>*:nth-child(2){animation-delay:.05s}@keyframes ixIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}}
+@media (max-width:900px){.ix-app{flex-direction:column}.ix-side{position:sticky;height:auto;flex:none;flex-direction:row;align-items:center;padding:10px 12px;gap:8px;overflow-x:auto}.ix-brand{padding:0 8px 0 4px}.ix-brand img{height:22px}.ix-links{flex-direction:row}.ix-group,.ix-foot{display:none}.ix-link{white-space:nowrap;padding:8px 10px;font-size:13px}.ix-link svg{display:none}.ix-top{padding:18px 18px 4px}}
+
+
+/* ===== General Ledger Reviewer ===== */
+:root{--gl-warn:#9A5B2E;--gl-warn-bg:#FBF3EC;--gl-low:#8A9491}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--gl-warn:#E6B48E;--gl-warn-bg:#47392F;--gl-low:#8E9894}}
+.gl{max-width:1320px;width:100%;box-sizing:border-box;padding:14px 40px 56px;display:flex;flex-direction:column;gap:22px}
+.gl [hidden]{display:none!important}
+#view-review,#view-compare,#results,#cmpResults{display:flex;flex-direction:column;gap:22px}
+.tabs{display:inline-flex;gap:4px;padding:4px;border-radius:12px;background:var(--ix-tint);align-self:flex-start;flex-wrap:wrap}
+.tab{font:600 14px var(--ix-font);color:var(--ix-deep);background:transparent;border:0;border-radius:9px;padding:10px 18px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ix-card);color:var(--ix-ink);box-shadow:0 1px 3px rgba(65,64,66,.12)}
+.tab:focus-visible,.btn:focus-visible,.chip:focus-visible,.gl select:focus-visible,.gl input:focus-visible,.drop:focus-visible,.rulelist button:focus-visible,.gl summary:focus-visible{outline:none;box-shadow:0 0 0 4px var(--ix-ring)}
+.panel{padding:26px 28px}
+.panel h2{margin:0 0 6px;font:600 18px/1.3 var(--ix-font);color:var(--ix-ink)}
+.panel p.lead{margin:0 0 18px;color:var(--ix-muted);font-size:14px;line-height:1.55;max-width:72ch}
+.drops{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.drop{position:relative;display:flex;align-items:center;gap:18px;padding:22px 24px;border:2px dashed var(--ix-line);border-radius:14px;background:var(--ix-bg);cursor:pointer;transition:border-color .15s,background .15s}
+.drop:hover,.drop.over{border-color:var(--ix-sage);background:var(--ix-tint)}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.drop .dic{flex:0 0 46px;height:46px;border-radius:12px;background:var(--ix-card);color:var(--ix-deep);display:flex;align-items:center;justify-content:center;border:1px solid var(--ix-line)}
+.drop strong{display:block;font-size:15px;font-weight:600}
+.drop span.small{display:block;font-size:13px;color:var(--ix-muted);margin-top:3px;line-height:1.45}
+.drop.done{border-style:solid;border-color:var(--ix-sage)}
+.privacy{display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-size:12.5px;color:var(--ix-deep);font-weight:500}
+.privacy::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ix-sage)}
+.msg{margin-top:14px;padding:12px 16px;border-radius:10px;font-size:14px;line-height:1.5}
+.msg.err{background:var(--gl-warn-bg);color:var(--gl-warn)}
+.msg.info{background:var(--ix-tint);color:var(--ix-ink)}
+.fileinfo{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px}
+.tag{font-size:12.5px;padding:5px 10px;border-radius:8px;background:var(--ix-tint);color:var(--ix-ink)}
+.tag b{font-weight:600;color:var(--ix-deep)}
+/* headline */
+.verdict{padding:30px 32px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px 32px;align-items:end}
+.verdict h2{margin:0;font:300 36px/1.15 var(--ix-font);letter-spacing:-.015em;color:var(--ix-ink);max-width:32ch}
+.verdict h2 b{font-weight:600}
+.verdict .sub{margin:10px 0 0;color:var(--ix-muted);font-size:14.5px;line-height:1.55;max-width:66ch}
+.figs{display:flex;gap:28px;flex-wrap:wrap}
+.fig .n{font:600 22px var(--ix-font);color:var(--ix-ink)}
+.fig .l{font-size:12.5px;color:var(--ix-muted);margin-top:2px}
+.pbar{grid-column:1/-1;display:flex;height:12px;border-radius:7px;overflow:hidden;background:var(--ix-tint)}
+.pbar span{display:block;height:100%}
+.pbar .h{background:var(--gl-warn)}.pbar .m{background:var(--ix-sage)}.pbar .lo{background:var(--gl-low)}
+.legend{grid-column:1/-1;display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--ix-muted);margin-top:-8px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.actions{grid-column:1/-1;display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding-top:6px;border-top:1px solid var(--ix-line);margin-top:4px;padding-top:18px}
+.fname{display:flex;align-items:center;gap:8px;flex:1 1 340px;min-width:0}
+.fname label{font-size:13px;color:var(--ix-muted);white-space:nowrap}
+.fname input{flex:1;min-width:0;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--ix-line);border-radius:10px;background:var(--ix-card);color:var(--ix-ink)}
+.fname .ext{font-size:13px;color:var(--ix-muted)}
+.btn{font:600 14px var(--ix-font);border-radius:10px;padding:11px 18px;cursor:pointer;border:1px solid var(--ix-deep);background:#56776C;color:#fff;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(65,64,66,.15)}
+.btn.ghost{background:var(--ix-card);color:var(--ix-deep);border-color:var(--ix-line)}
+.btn[disabled]{opacity:.5;cursor:default;transform:none;box-shadow:none}
+/* body: rules + findings */
+.work{display:flex;flex-direction:column;gap:22px}
+.rules{padding:20px 22px}
+.rules h3,.findings h3{margin:0 0 12px;font:600 15px var(--ix-font)}
+.rulelist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:2px 14px}
+.rulelist button{width:100%;display:flex;gap:10px;align-items:baseline;text-align:left;font:inherit;font-size:13px;line-height:1.35;color:var(--ix-ink);background:transparent;border:0;border-radius:8px;padding:8px 10px;cursor:pointer}
+.rulelist button:hover{background:var(--ix-tint)}
+.rulelist button[aria-pressed="true"]{background:var(--ix-tint);box-shadow:inset 3px 0 0 var(--ix-deep)}
+.rulelist .rid{font-weight:600;color:var(--ix-deep);flex:0 0 32px}
+.rulelist .rn{flex:1}
+.rulelist .rc{font-weight:600}
+.rules .none{font-size:13px;color:var(--ix-muted)}
+.findings{padding:20px 22px;min-width:0}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.chip{font:500 13px var(--ix-font);padding:7px 13px;border-radius:20px;border:1px solid var(--ix-line);background:var(--ix-card);color:var(--ix-ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:#56776C;border-color:#56776C;color:#fff}
+.filters input[type=search]{flex:1 1 200px;font:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--ix-line);border-radius:10px;background:var(--ix-card);color:var(--ix-ink)}
+.count{font-size:13px;color:var(--ix-muted);margin:0 0 10px}
+.tablewrap{overflow-x:auto;border:1px solid var(--ix-line);border-radius:12px}
+table.grid{border-collapse:collapse;width:100%;font-size:13px;min-width:980px}
+table.grid td.what{min-width:300px;width:34%}
+table.grid td.desc{min-width:200px}
+table.grid th{position:sticky;top:0;background:var(--ix-tint);text-align:left;font-weight:600;color:var(--ix-ink);padding:10px 12px;white-space:nowrap}
+table.grid td{padding:11px 12px;border-top:1px solid var(--ix-line);vertical-align:top;line-height:1.45}
+table.grid td.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+table.grid .ref{display:block;font-size:12px;color:var(--ix-muted)}
+.pri{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.pri.High{background:var(--gl-warn-bg);color:var(--gl-warn)}
+.pri.Medium{background:var(--ix-tint);color:var(--ix-deep)}
+.pri.Low{background:transparent;color:var(--ix-muted);border:1px solid var(--ix-line)}
+.issue{font-weight:600}
+.act{display:block;color:var(--ix-muted);margin-top:3px;max-width:62ch}
+.more{margin-top:12px}
+.empty{padding:28px;text-align:center;color:var(--ix-muted);font-size:14px}
+/* compare */
+.cmpstats{display:flex;gap:28px;flex-wrap:wrap;margin:6px 0 0}
+.arrow{color:var(--ix-muted);padding:0 4px}
+.was{color:var(--ix-muted);text-decoration:line-through;text-decoration-color:var(--ix-line)}
+.yes{color:var(--ix-deep);font-weight:600}.no{color:var(--gl-warn);font-weight:600}
+/* reference */
+details.ref{padding:18px 24px}
+details.ref summary{cursor:pointer;font-weight:600;font-size:15px;list-style-position:inside}
+details.ref ol{margin:14px 0 0;padding-left:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:8px 24px}
+details.ref li{font-size:13px;line-height:1.5;color:var(--ix-muted)}
+details.ref li b{color:var(--ix-ink)}
+.foot{font-size:12.5px;color:var(--ix-muted);padding:0 4px}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--ix-line);border-top-color:var(--ix-deep);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media (max-width:900px){.gl{padding:12px 16px 40px}.verdict{grid-template-columns:1fr;padding:22px}.verdict h2{font-size:28px}.panel{padding:20px}}
+
+</style>
+</head>
+<body class="ix">
+<div class="ix-app">
+<nav class="ix-side" aria-label="Staff tools"><a class="ix-brand" href="/"><img src="data:image/png;base64,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" alt="Indepth Accounting"></a><div class="ix-links"><a class="ix-link" href="/"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5h-5v5H5a1 1 0 0 1-1-1z"/></svg><span>Home</span></a><span class="ix-group">Compliance work</span><a class="ix-link" href="/collation/"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="15" rx="1.5"/><path d="M4 7v12.5A1.5 1.5 0 0 0 5.5 21H15M9 8h6M9 11h6M9 14h3"/></svg><span>Collation</span></a><a class="ix-link" href="/filing/"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6H9l2 2h8.5A1.5 1.5 0 0 1 21 9.5v8A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z"/><path d="M12 11v5M9.5 13.5 12 16l2.5-2.5"/></svg><span>Document Filing</span></a><a class="ix-link" href="/gl-reviewer/" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H18v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H18v-3M9 7.5h5M9 10.5h3"/><path d="m11.5 14 1.5 1.5 3-3"/></svg><span>GL Reviewer</span></a><span class="ix-group">Client documents</span><a class="ix-link" href="/certify/"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8.5 7h7M8.5 10h4"/><circle cx="14" cy="15.5" r="2.5"/></svg><span>Certification</span></a><a class="ix-link" href="/redaction/"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3v5h5"/><rect x="8" y="11" width="8" height="2" fill="currentColor"/><rect x="8" y="15" width="5" height="2" fill="currentColor"/></svg><span>PDF Redaction</span></a><a class="ix-link" href="/structure-mapper/"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="4.5" rx="1"/><rect x="3" y="16.5" width="6" height="4.5" rx="1"/><rect x="15" y="16.5" width="6" height="4.5" rx="1"/><path d="M12 7.5V12M6 16.5V12h12v4.5"/></svg><span>Structure Mapper</span></a></div><span class="ix-foot">Indepth Accounting<br>Staff tools</span></nav>
+<div class="ix-main">
+<header class="ix-top"><div class="ix-titles"><h1 class="ix-h1">General Ledger Reviewer</h1><p class="ix-sub">Checks a Xero General Ledger Detail export for GST and coding problems before the BAS is prepared.</p></div><div class="ix-slot"><a class="ix-homebtn" href="/"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5h-5v5H5a1 1 0 0 1-1-1z"/></svg>Staff tools</a></div></header>
+<div class="gl">
+  <div class="tabs" role="tablist" aria-label="What do you want to do">
+    <button class="tab" role="tab" id="tab-review" aria-selected="true" aria-controls="view-review">Review a ledger</button>
+    <button class="tab" role="tab" id="tab-compare" aria-selected="false" aria-controls="view-compare">Compare before and after</button>
+  </div>
+
+  <!-- ===== Review ===== -->
+  <div id="view-review" role="tabpanel" aria-labelledby="tab-review">
+    <section class="ix-card panel">
+      <h2>Drop in the General Ledger Detail export</h2>
+      <p class="lead">Export the General Ledger Detail from Xero for the BAS period, as an Excel file. Either heading style works (GST or Tax), with or without an Account column.</p>
+      <label class="drop" id="dropReview" tabindex="0">
+        <span class="dic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3v5h5M12 11v6M9.5 14.5 12 17l2.5-2.5"/></svg></span>
+        <span><strong id="dropReviewTitle">Drop the file here, or click to choose it</strong><span class="small" id="dropReviewHint">Excel (.xlsx) or CSV</span></span>
+        <input type="file" id="fileReview" accept=".xlsx,.xlsm,.csv" aria-label="Choose the General Ledger Detail file">
+      </label>
+      <span class="privacy">The ledger never leaves this computer. Nothing is uploaded.</span>
+      <div id="reviewMsg" aria-live="polite"></div>
+      <div class="fileinfo" id="fileInfo"></div>
+    </section>
+
+    <div id="results" hidden>
+      <section class="ix-card verdict" aria-live="polite">
+        <div><h2 id="headline"></h2><p class="sub" id="headSub"></p></div>
+        <div class="figs" id="figs"></div>
+        <div class="pbar" id="pbar" aria-hidden="true"></div>
+        <div class="legend" id="legend"></div>
+        <div class="actions">
+          <div class="fname"><label for="outName">File name</label><input id="outName" type="text" spellcheck="false"><span class="ext">.xlsx</span></div>
+          <button class="btn" id="dlReview">Download review workbook</button>
+        </div>
+      </section>
+
+      <div id="skipped" hidden></div>
+
+      <div class="work">
+        <aside class="ix-card rules" aria-label="Rules that matched">
+          <h3>What was found <span style="font-weight:400;color:var(--ix-muted);font-size:13px">(click a rule to show only those items)</span></h3>
+          <ul class="rulelist" id="ruleList"></ul>
+        </aside>
+        <section class="ix-card findings" aria-label="Items to check">
+          <h3>Items to check</h3>
+          <div class="filters">
+            <button class="chip" data-pri="" aria-pressed="true">All</button>
+            <button class="chip" data-pri="High" aria-pressed="false">High</button>
+            <button class="chip" data-pri="Medium" aria-pressed="false">Medium</button>
+            <button class="chip" data-pri="Low" aria-pressed="false">Low</button>
+            <input type="search" id="q" placeholder="Search supplier, account or rule" aria-label="Search the items">
+          </div>
+          <p class="count" id="count"></p>
+          <div class="tablewrap"><table class="grid"><thead><tr><th>Row</th><th>Date</th><th>Description</th><th>Account</th><th>GST</th><th>Tax code</th><th>Priority</th><th>What to check</th></tr></thead><tbody id="rows"></tbody></table></div>
+          <div class="more" id="moreWrap" hidden><button class="btn ghost" id="more">Show more</button></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Compare ===== -->
+  <div id="view-compare" role="tabpanel" aria-labelledby="tab-compare" hidden>
+    <section class="ix-card panel">
+      <h2>Compare a ledger before and after corrections</h2>
+      <p class="lead">Drop in the client's original General Ledger Detail and the corrected one. You'll see every transaction that changed, and whether the reviewer flagged it in the original. Use it to test rule changes and for training.</p>
+      <div class="drops">
+        <label class="drop" id="dropBefore" tabindex="0">
+          <span class="dic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3v5h5"/></svg></span>
+          <span><strong id="beforeTitle">Before corrections</strong><span class="small" id="beforeHint">As the client coded it</span></span>
+          <input type="file" id="fileBefore" accept=".xlsx,.xlsm,.csv" aria-label="Choose the ledger before corrections">
+        </label>
+        <label class="drop" id="dropAfter" tabindex="0">
+          <span class="dic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3v5h5M9 14l2 2 4-4"/></svg></span>
+          <span><strong id="afterTitle">After corrections</strong><span class="small" id="afterHint">After our team fixed it</span></span>
+          <input type="file" id="fileAfter" accept=".xlsx,.xlsm,.csv" aria-label="Choose the ledger after corrections">
+        </label>
+      </div>
+      <span class="privacy">Both ledgers stay on this computer. Nothing is uploaded.</span>
+      <div id="cmpMsg" aria-live="polite"></div>
+    </section>
+
+    <div id="cmpResults" hidden>
+      <section class="ix-card verdict" aria-live="polite">
+        <div><h2 id="cmpHeadline"></h2><p class="sub" id="cmpSub"></p></div>
+        <div class="figs" id="cmpFigs"></div>
+        <div class="actions">
+          <div class="fname"><label for="cmpName">File name</label><input id="cmpName" type="text" spellcheck="false"><span class="ext">.xlsx</span></div>
+          <button class="btn" id="dlCompare">Download comparison workbook</button>
+        </div>
+      </section>
+      <section class="ix-card findings" aria-label="Changed transactions">
+        <h3>Changed transactions</h3>
+        <div class="filters">
+          <button class="chip cchip" data-c="" aria-pressed="true">All</button>
+          <button class="chip cchip" data-c="no" aria-pressed="false">Not flagged</button>
+          <button class="chip cchip" data-c="yes" aria-pressed="false">Flagged</button>
+          <input type="search" id="cq" placeholder="Search supplier or account" aria-label="Search the changes">
+        </div>
+        <p class="count" id="cCount"></p>
+        <div class="tablewrap"><table class="grid"><thead><tr><th>Date</th><th>Description</th><th>Account</th><th>Tax code</th><th>GST</th><th>Reviewer</th></tr></thead><tbody id="cRows"></tbody></table></div>
+      </section>
+    </div>
+  </div>
+
+  <details class="ix-card ref">
+    <summary>What the reviewer checks</summary>
+    <ol id="ruleRef"></ol>
+  </details>
+  <p class="foot" id="foot"></p>
+</div>
+
+</div>
+</div>
+<script>
+// ===== General Ledger Reviewer engine (shared by the staff tool and the Excel skill) =====
+// reviewLedger(vals) takes the sheet as a 2D array (row 1 = vals[0]) and returns the findings.
+// Returns null when the sheet does not have General Ledger headings.
+const GLR_VERSION = "v5";
+function reviewLedger(vals) {
+// ============================== SETTINGS ==============================
+const SETTINGS = {
+  // Car limit by financial year (key = year the FY starts). Add a line each July.
+  carLimits: { 2024: 69674, 2025: 69674, 2026: 69883 },
+  carLimitWarnPct: 0.9,          // flag vehicles at or above 90% of the limit
+  newLoanMin: 5000,
+  assetSmallMax: 1000,
+  missedCreditMin: 100,          // R25: GST Free purchases under this are not flagged           // R31: purchases under this in a fixed asset account are flagged
+  insurancePayoutMin: 1000,      // R32: insurer payouts of this size or more coded to an expense account
+  duplicateMin: 100,             // R09: only flag exact duplicates of this net amount or more
+  amenitiesMin: 50,              // R15: staff amenities rows under this amount are not flagged (keyword and Entertainment account matches always flag)              // R23: a credit this size or more to a loan or finance account is flagged
+  gstTolerancePct: 0.01,         // R08: allowed variance as % of expected GST
+  gstToleranceMin: 0.05,         // R08: minimum allowed variance in dollars
+  // R15 and R16 only: skip rows below this net amount. 0 = flag everything.
+  minAmountEntertainmentPersonal: 0,
+
+  // GST Rate Names that carry GST. Anything else starting "GST on" also counts.
+  gstCodes: ["gst on expenses", "gst on income", "gst on capital", "gst on imports"],
+  // GST Rate Names that carry no GST. Anything containing free / excluded / input taxed / no gst also counts.
+  noGstCodes: ["gst free expenses", "gst free income", "gst free capital", "gst free exports",
+               "bas excluded", "input taxed", "no gst", "gst free"],
+
+  // R10 government and statutory charges (searched in Description and Reference)
+  government: ["council rates", "rates notice", "water rates", "land tax", "asic",
+    "ato", "australian taxation office", "stamp duty", "transfer duty", "office of state revenue",
+    "queensland revenue office", "revenue office", "state penalties enforcement registry", "sper",
+    "transport and main roads", "department of transport", "tmr", "qld transport",
+    "queensland transport", "service nsw", "vicroads", "rego", "vehicle registration",
+    "car registration", "trailer registration", "boat registration", "registration renewal",
+    "ctp", "fines", "infringement", "penalty", "penalties", "traffic fine", "parking fine",
+    "speeding", "magistrates", "magistrates court", "court fee", "court filing fee", "police", "department of", "queensland government",
+    "government levy", "licence fee", "license fee", "permit fee", "workcover", "fair work", "qbcc",
+    "qld govt", "queensland govt", "unitywater", "unity water", "urban utilities", "water corporation",
+    "sydney water", "south east water", "water usage", "water charges"],
+  // Councils and "Govt" often sell taxable services (tip fees, hire), so they only count with one of councilCharges
+  councilWords: ["council", "shire", "city council", "regional council", "shire council", "govt"],
+  councilCharges: ["rates", "rate notice", "rates notice", "fine", "fines", "infringement", "penalty", "permit",
+    "licence", "license", "registration", "animal", "dog", "application", "acdc", "lodgement", "levy"],
+  // R10 account names that are always government charges
+  governmentAccounts: ["fines", "penalties", "fines and penalties", "council rates", "rates and taxes",
+    "land tax", "rates", "water rates"],
+
+  // R11 overseas suppliers (Description and Reference)
+  overseas: ["new zealand", "auckland", "wellington", "christchurch", "queenstown", "nz",
+    "united states", "usa", "usd", "united kingdom", "uk", "london", "gbp", "europe", "eur",
+    "japan", "tokyo", "jpy", "singapore", "sgd", "china", "beijing", "shanghai", "shenzhen",
+    "guangzhou", "hangzhou", "ningbo", "yiwu", "hong kong", "hk", "taiwan", "india", "cny", "rmb",
+    "indonesia", "bali", "thailand", "vietnam", "philippines", "malaysia", "korea", "canada",
+    "co ltd", "company limited", "llc", "gmbh", "pte", "pte ltd", "sdn bhd", "overseas",
+    "international transaction", "foreign transaction", "alibaba", "aliexpress", "temu", "shein",
+    "upwork", "fiverr", "facebook", "meta platforms", "google ads", "linkedin", "amazon web services",
+    "aws", "shopify"],
+
+  // R13 private-use wording with a business GST code
+  privateUse: ["private", "personal", "family holiday", "family trip", "school fees", "childcare",
+    "personal meal", "personal clothing"],
+
+  // R15 entertainment (Description and Reference). Account names in entertainmentAccounts always count.
+  entertainment: ["entertainment", "restaurant", "cafe", "bistro", "bar", "pub", "tavern",
+    "hotel", "brewery", "winery", "distillery", "rsl", "surf club", "bowls club", "leagues club",
+    "golf club", "golf course", "catering", "caterer", "client lunch", "client dinner", "staff lunch",
+    "staff dinner", "team lunch", "team dinner", "lunch", "dinner", "breakfast", "drinks",
+    "christmas party", "xmas party", "staff party", "end of year party", "corporate box",
+    "concert", "ticketek", "ticketmaster", "theatre", "cinema", "event cinemas", "hoyts",
+    "sporting ticket", "football ticket", "footy ticket", "uber eats", "menulog", "doordash",
+    "deliveroo", "gift hamper", "hamper", "cellars", "bottle shop", "bottleshop", "meats",
+    "meat", "butcher", "butchery", "wine", "beer", "espresso", "expresso", "brewing", "liquorland", "bws",
+    "dan murphy", "dan murphys", "first choice liquor", "tavern lunch"],
+  entertainmentAccounts: ["entertainment", "ent", "client entertainment", "staff entertainment",
+    "meals and entertainment", "functions", "staff amenities", "amenities",
+    "gifts", "corporate gifts", "client gifts"],
+  // Travel: meals and accommodation while travelling for work are not entertainment (R15 and R30 skip these)
+  travelAccounts: ["travel", "travel national", "travel international", "travel domestic", "travel and accommodation", "accommodation"],
+  travelWords: ["sales trip", "business trip", "work trip", "travel", "travelling", "accommodation", "accom", "overnight", "conference trip"],
+  // R35 accommodation that may be private
+  accommodation: ["accommodation", "accom", "hotel", "motel", "resort", "airbnb", "air bnb", "stayz", "booking com", "wotif",
+    "expedia", "hotels com", "agoda", "holiday park", "caravan park", "big4", "serviced apartment", "apartments", "lodge",
+    "bnb", "b and b", "quest", "mercure", "novotel", "ibis", "hilton", "marriott", "sheraton", "rydges", "oaks", "meriton",
+    "peppers", "crowne plaza", "holiday inn", "sofitel", "pullman", "travelodge", "best western", "rendezvous"],
+  accommodationAccounts: ["accommodation", "travel accommodation"],
+  leisureWords: ["holiday", "holidays", "family", "weekend", "getaway", "honeymoon", "anniversary", "birthday", "wife", "husband",
+    "partner", "kids", "children", "school holidays", "christmas", "easter", "long weekend", "break", "staycation"],
+  businessPurpose: ["sales trip", "business", "conference", "client", "customer", "meeting", "site", "job", "project", "tournament",
+    "expo", "trade show", "training", "course", "work", "install", "installation", "delivery", "visit", "tender", "audit",
+    "staff", "crew", "contract", "supplier", "inspection", "seminar", "workshop", "event", "show", "trip"],
+  // Accounts where entertainment keywords are ignored (e.g. "Peregian hotel verge" mowing in Subcontractors)
+  entertainmentExcludeAccounts: ["subcontractors", "contractors", "materials", "cost of sales", "income",
+    "sales", "revenue", "rent", "repairs and maintenance"],
+  // R30 strong entertainment wording: flagged when it sits outside an Entertainment account, even with no GST
+  entertainmentStrong: ["restaurant", "cafe", "bistro", "tavern", "pub", "hotel bar", "brewery", "brewing",
+    "winery", "distillery", "rsl", "surf club", "bowls club", "leagues club", "golf club", "bottle shop",
+    "bottleshop", "cellars", "liquorland", "bws", "dan murphy", "dan murphys", "first choice liquor",
+    "christmas party", "xmas party", "staff party", "end of year party", "corporate box", "concert",
+    "ticketek", "ticketmaster", "client lunch", "client dinner", "team lunch", "team dinner"],
+  // Never treat these as entertainment (stops false positives)
+  entertainmentExclude: ["mobil", "fuel", "diesel", "petrol", "unleaded", "flat bar", "flatbar",
+    "bar stock", "crow bar", "crowbar", "roll bar", "nudge bar", "tow bar", "towbar", "rebar",
+    "bar chart", "cutlery drawer", "hotel booking for staff travel"],
+
+  // R16 personal or private spending (Description and Reference)
+  personal: ["personal", "private", "family holiday", "family trip", "school fees", "childcare",
+    "goodstart", "home groceries", "household", "personal subscription", "personal insurance",
+    "personal travel", "personal accommodation", "personal meal", "personal clothing",
+    "netflix", "foxtel", "stan com", "binge", "kayo", "disney", "disney plus", "spotify",
+    "apple tv", "amazon prime", "prime video", "paramount", "audible", "youtube premium",
+    "playstation", "xbox", "nintendo", "steam games",
+    "life insurance", "income protection", "tal life", "aia australia", "mlc life",
+    "bupa", "medibank", "hcf", "nib", "ahm", "private health",
+
+    "dan murphy", "dan murphys", "bws", "liquorland", "first choice liquor", "liquor",
+    "sportsbet", "tab com", "bet365", "ladbrokes", "pointsbet", "neds",
+    "anytime fitness", "fitness first", "goodlife", "f45", "gym", "pilates", "yoga",
+    "hairdresser", "hair salon", "barber", "beauty", "nails", "day spa",
+    "petbarn", "petstock", "vet", "veterinary", "jetstar holiday", "flight centre",
+    "child support", "ancestry"],
+  // Supermarkets: only flagged as personal when NOT in one of businessConsumableAccounts
+  supermarkets: ["woolworths", "coles", "aldi", "iga"],
+  businessConsumableAccounts: ["staff amenities", "amenities", "cleaning", "kitchen", "consumables",
+    "office supplies", "office expenses", "materials", "cost of sales", "purchases", "stock", "meetings",
+    "training", "entertainment", "gifts", "printing", "stationery", "printing and stationery",
+    "workplace health and safety", "field consumables"],
+  personalExclude: ["aldi mobile", "coles mobile", "woolworths mobile", "inventory", "work in progress", "wip", "bom", "manufacturing", "flat bar",
+    "flatbar", "cutlery drawer"],
+
+  // R17 non-GST code carrying GST: no extra settings (driven by gstCodes/noGstCodes)
+
+  // R18 financial supplies (normally input taxed, no GST credit)
+  financial: ["credit card fee", "card fee", "card account fee", "star card fee", "bank fee", "bank fees", "account fee", "account keeping fee", "account keeping",
+    "monthly fee", "interest", "interest charged", "loan fee", "dishonour fee", "dishonour",
+    "overdrawn fee", "international transaction fee", "foreign transaction fee"],
+  financialExclude: ["merchant fee", "merchant fees", "eftpos terminal", "square fee", "stripe fee",
+    "tyro fee", "paypal fee"],
+
+  // R19 wages, super and PAYG (BAS Excluded)
+  wages: ["wages", "wage", "salary", "salaries", "superannuation", "super guarantee",
+    "super contribution", "payg", "payg withholding", "payroll", "director fee", "director fees",
+    "allowance", "bonus"],
+  wagesAccounts: ["wages", "wages and salaries", "salaries", "superannuation", "payg withholding",
+    "directors fees", "director fees"],
+
+  // R20 private, drawings or loan accounts (GST should never be claimed here)
+  drawingsAccounts: ["drawings", "owner drawings", "private", "director loan", "directors loan",
+    "loan director", "loan directors", "shareholder loan", "loan shareholder", "beneficiary loan",
+    "loan beneficiary", "related party loan", "div 7a", "division 7a", "funds introduced"],
+
+  // R21 loan and finance repayments with GST
+  loans: ["loan", "loan repayment", "finance repayment", "finance company", "chattel mortgage", "hire purchase",
+    "toyota finance", "ford credit", "macquarie leasing", "anz finance", "westpac finance",
+    "commonwealth finance", "pepper money", "angle finance", "metro finance", "liberty finance",
+    "repayment"],
+  loansExclude: ["loan fee"],
+
+  // R12 car accounts (any account name containing these words is treated as a car account)
+  carAccounts: ["motor vehicle", "motor vehicles", "vehicle", "vehicles", "car", "cars", "mv"],
+  // R12 also checks large purchases in any account whose wording mentions a vehicle
+  vehicleWords: ["vehicle", "car", "ute", "truck", "van", "wagon", "suv", "4wd", "motors", "auto",
+    "toyota", "isuzu", "ford", "mazda", "mitsubishi", "nissan", "holden", "hyundai", "kia", "byd",
+    "tesla", "volkswagen", "vw", "mercedes", "bmw", "audi", "lexus", "subaru", "suzuki", "landcruiser",
+    "hilux", "ranger", "d max", "dmax", "prado", "everest", "triton", "navara", "hino", "fuso"],
+
+  // Pass-through accounts: costs paid for another entity and reimbursed (contra, clearing, inter-company).
+  // Treated like loan accounts: no duplicate, personal, entertainment or BAS Excluded flags. GST claimed here still flags (R20).
+  passThroughAccounts: ["contra", "contras", "clearing", "inter company", "intercompany", "inter entity", "related party",
+    "recharge", "recharges", "on charge", "on charged", "recoverable", "recoverables", "reimbursable", "suspense"],
+
+  // R23 loan and finance accounts (a large new credit here usually means an asset was bought)
+  loanAccounts: ["loan", "loans", "finance", "chattel mortgage", "hire purchase", "lease liability",
+    "vehicle finance", "equipment finance"],
+
+  // R24 donations (no GST credit)
+  donations: ["donation", "donations", "charity", "fundraiser", "fundraising", "gala"],
+  donationAccounts: ["donations", "charitable donations"],
+
+  // R26 food retailers: GST claimed on the full amount usually means a mixed receipt was not split
+  foodRetailers: ["woolworths", "coles", "aldi", "iga", "foodworks", "butcher", "butchery", "meats",
+    "meat barn", "bakery", "fruit and veg", "fruit market", "greengrocer", "harris farm", "costco"],
+  // R26 is skipped when the description shows non-food items
+  nonFood: ["batteries", "battery", "stationery", "markers", "pens", "printer", "ink", "cleaning", "detergent",
+    "toilet paper", "paper towel", "light globes", "globes", "tools", "hardware"],
+  // R27 accredited training and first aid (often GST-free education)
+  educationExclude: ["first aid products", "first aid product", "chemist", "pharmacy", "first aid store", "first aid kit", "first aid kits", "first aid supplies", "first aid box"],
+  education: ["first aid", "cpr", "mhfa", "mental health first aid", "rto", "training college", "tafe",
+    "university", "accredited training", "certificate iii", "certificate iv", "cert iii", "cert iv",
+    "white card", "school fees", "tuition"],
+  // R28 BAS Excluded on a supplier purchase: these are NOT flagged (BAS Excluded is right for them)
+  basExcludedOk: ["wages", "salaries", "salary", "superannuation", "super", "payg", "director fee", "directors fees",
+    "drawings", "loan", "loans", "finance", "chattel mortgage", "hire purchase", "transfer", "transfers",
+    "income tax", "ato", "integrated client account", "gst", "depreciation", "amortisation", "dividend",
+    "dividends", "suspense", "clearing", "provision", "leave", "payroll tax", "fringe benefits", "fbt",
+    "non deductible entertainment", "entertainment", "share capital", "retained earnings", "rounding", "personal",
+    "private", "fuel tax credits", "stamp duty", "fines", "penalties", "fines and penalties", "land tax"],
+  // R31 fixed asset accounts (name must match exactly, ignoring the account code)
+  assetAccounts: ["motor vehicles", "motor vehicle", "motor vehicles at cost", "plant and equipment",
+    "plant and equipment at cost", "plant and machinery", "office equipment", "office equipment at cost",
+    "computer equipment", "computer equipment at cost", "furniture and fittings", "fixtures and fittings",
+    "tools and equipment", "trucks", "truck", "trailers", "leasehold improvements", "leasehold improvements at cost"],
+  // R34 vehicle asset accounts (name must match exactly, ignoring the account code). Any "... at cost" account with a vehicle word also counts.
+  vehicleAssetAccounts: ["motor vehicles", "motor vehicle", "motor vehicles at cost", "motor vehicle at cost", "vehicles",
+    "vehicles at cost", "cars", "cars at cost", "trucks", "truck", "trucks at cost", "utes", "utes at cost"],
+  // R32 insurers and claim wording
+  insurers: ["nti", "national transport insurance", "allianz", "qbe", "suncorp", "aami", "cgu", "gio",
+    "nrma", "racq", "zurich", "chubb", "vero", "youi", "budget direct", "wesfarmers insurance"],
+  insuranceClaim: ["claim", "cash settlement", "settlement", "date of loss", "total loss", "payout"],
+
+  // R25 possible missed GST credit: a GST Free code on an ordinary purchase. These are NOT flagged by R25:
+  missedCreditSkip: ["depreciation", "amortisation", "amortization", "wages", "salaries", "superannuation",
+    "payg", "interest", "bank fees", "fees and charges", "borrowing costs", "loan", "finance", "drawings",
+    "director loan", "shareholder loan", "income tax", "gst", "ato", "council", "rates", "land tax",
+    "rego", "fines", "penalties", "life insurance", "income protection", "training", "first aid", "cpr",
+    "course", "courses", "rto", "tafe", "mhfa", "white card",
+    "workcover", "ctp", "stamp duty", "asic",
+    "donation", "donations", "entertainment", "gifts", "workcover", "rent", "water", "overseas",
+    "international", "suspense", "clearing", "rounding", "transfer", "adjustment", "amenities", "qbcc",
+    "licence", "licences", "licenses", "permits", "food", "groceries"],
+  missedCreditSources: ["spend money", "payable invoice", "payable payment", "payable prepayment allocation"],
+
+  // Rows matching these are never treated as GST transactions (system postings)
+  systemRows: ["depreciation", "amortisation", "amortization", "accumulated depreciation",
+    "accumulated amortisation", "fixed asset", "asset disposal", "opening balance", "conversion balance"],
+};
+// ============================ END SETTINGS ============================
+// Column names vary by Xero export. Each field accepts any of these headings.
+const ALIASES = {
+  "Date": ["Date"], "Source": ["Source"], "Description": ["Description"], "Debit": ["Debit"], "Credit": ["Credit"],
+  "GST": ["GST", "Tax", "GST Amount", "Tax Amount"],
+  "GST Rate Name": ["GST Rate Name", "Tax Rate Name", "Tax Code", "GST Code", "Tax Type"],
+};
+const OPTIONAL = { "Reference": ["Reference"], "Account": ["Account", "Account Name"], "Account Code": ["Account Code"],
+  "GST Rate": ["GST Rate", "Tax Rate"], "Contact": ["Contact", "Contact Name"] };
+const REQUIRED = Object.keys(ALIASES);
+let headerRow = -1, hdr = null;
+for (let r = 0; r < Math.min(30, vals.length); r++) {
+  const row = (vals[r] || []).map(v => String(v ?? "").trim());
+  const lower = row.map(x => x.toLowerCase());
+  if (REQUIRED.every(f => ALIASES[f].some(a => lower.includes(a.toLowerCase())))) { headerRow = r; hdr = row; break; }
+}
+if (headerRow < 0) return null;
+const col = {};
+const lowerHdr = hdr.map(x => x.toLowerCase());
+for (const [field, names] of Object.entries({ ...ALIASES, ...OPTIONAL })) {
+  for (const n of names) { const i = lowerHdr.indexOf(n.toLowerCase()); if (i >= 0) { col[field] = i; break; } }
+}
+// "Tax Rate" can hold a name or a percentage. Only use it as a percentage column if it holds percentages.
+if (col["GST Rate"] !== undefined && col["GST Rate"] === col["GST Rate Name"]) delete col["GST Rate"];
+const refCol = col.Reference ?? -1;
+const accCol = col.Account ?? -1;
+const rateCol = col["GST Rate"] ?? -1;
+// ---------- helpers ----------
+const T = v => String(v ?? "").trim();
+const L = v => T(v).toLowerCase();
+const num = v => {
+  if (typeof v === "number") return v;
+  let s = String(v ?? "").trim(); const neg = /^\(.*\)$/.test(s);
+  const n = Number(s.replace(/[$,()\s]/g, "")); return Number.isFinite(n) ? (neg ? -n : n) : 0;
+};
+// "10.00%", "10%", 0.1 or 10 -> 10. Blank or unreadable -> null
+const pct = v => {
+  if (v === "" || v === null || v === undefined) return null;
+  if (typeof v === "number") return v <= 1 ? v * 100 : v;
+  const m = String(v).match(/-?[\d.]+/); return m ? Number(m[0]) : null;
+};
+const norm = v => L(v).replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+const has = (text, phrase) => (" " + norm(text) + " ").includes(" " + norm(phrase) + " ");
+const any = (text, list) => list.some(p => has(text, p));
+const round2 = v => Math.round(num(v) * 100) / 100;
+const MONTHS = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, sept:8, oct:9, nov:10, dec:11 };
+// Returns a UTC Date for Excel serials, Date objects, dd/mm/yyyy and "d Mmm yyyy" text, else null
+function toDate(v) {
+  if (v instanceof Date && !isNaN(v)) return v;
+  if (typeof v === "number" && v > 20000 && v < 80000) return new Date(Math.round((v - 25569) * 86400000));
+  const s = T(v);
+  let m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+  if (m) { let y = +m[3]; if (y < 100) y += 2000; return new Date(Date.UTC(y, +m[2] - 1, +m[1])); }
+  m = s.match(/^(\d{1,2})[\s\-]([A-Za-z]{3,4})[A-Za-z]*[\s\-,]+(\d{2,4})$/);
+  if (m && MONTHS[m[2].toLowerCase()] !== undefined) { let y = +m[3]; if (y < 100) y += 2000; return new Date(Date.UTC(y, MONTHS[m[2].toLowerCase()], +m[1])); }
+  return null;
+}
+const NOT_ACCOUNT = ["total", "net movement", "opening balance", "closing balance", "date"];
+
+// ---------- read transactions, tracking the account heading above each ----------
+let account = "";
+const tx = [];
+for (let r = headerRow + 1; r < vals.length; r++) {
+  const row = vals[r], dt = toDate(row[col.Date]);
+  if (dt) {
+    const fromCol = accCol >= 0 ? T(row[accCol]) : "";
+    tx.push({ row: r + 1, acc: fromCol || account, v: row, dt });
+    continue;
+  }
+  const label = T(row[col.Date]);
+  const lbl = L(label);
+  if (label && !NOT_ACCOUNT.some(x => lbl === x || lbl.startsWith(x + " "))) account = label;
+}
+
+// ---------- tax code classification ----------
+function codeType(code, rate) {
+  const c = L(code);
+  if (!c) return "blank";
+  if (rate !== null && rate !== undefined) return rate > 0.0001 ? "gst" : "none";
+  if (SETTINGS.noGstCodes.includes(c) || /free|excluded|input taxed|no gst|exempt/.test(c)) return "none";
+  if (SETTINGS.gstCodes.includes(c) || c.startsWith("gst on")) return "gst";
+  return "unknown";
+}
+
+// ---------- duplicate keys ----------
+const dupCount = new Map();
+for (const t of tx) {
+  const v = t.v;
+  t.key = [t.acc, T(v[col.Date]), T(v[col.Source]), T(v[col.Description]), refCol >= 0 ? T(v[refCol]) : "",
+    round2(v[col.Debit]), round2(v[col.Credit]), round2(v[col.GST]), T(v[col["GST Rate Name"]])].join("|");
+  dupCount.set(t.key, (dupCount.get(t.key) || 0) + 1);
+}
+
+// ---------- rule definitions: id, issue, action, priority ----------
+const RULES = [
+  ["R01", "Missing description", "Enter or obtain a description.", "Low"],
+  ["R02", "Missing source type", "Confirm the source type.", "Low"],
+  ["R03", "Debit and credit both populated", "Check why both debit and credit are populated.", "Low"],
+  ["R04", "Zero-value transaction", "Confirm whether the zero-value row should remain.", "Low"],
+  ["R05", "GST amount with no GST rate name", "GST has been recorded but no tax code is set. Confirm the GST rate name.", "High"],
+  ["R06", "GST code with zero GST", "Coded to a GST rate but no GST recorded. Check whether a tax invoice is held. If not, recode to GST Free or BAS Excluded.", "High"],
+  ["R07", "GST exceeds transaction amount", "Check amount and GST against the source document.", "High"],
+  ["R08", "GST not 10% of the net amount", "Check GST against the tax invoice and correct it in Xero.", "High"],
+  ["R09", "Exact duplicate candidate", "Check whether repeated rows are valid or duplicated.", "Medium"],
+  ["R10", "Government or statutory charge carrying GST", "Fines, rego, council, ASIC and ATO charges generally carry no GST. Check the notice component by component and remove the GST if none applies.", "High"],
+  ["R11", "Possible overseas supplier carrying GST", "Overseas suppliers often do not charge Australian GST. Check the invoice for an ABN and a GST amount before claiming.", "High"],
+  ["R12", "Vehicle purchase near or above the car limit", "Confirm whether this is a car (designed to carry under 1 tonne and fewer than 9 passengers). If it is, cap the GST credit at one-eleventh of the car limit. Utes over 1 tonne, trucks and goods vans are not capped.", "High"],
+  ["R13", "Private or mixed-use wording with a GST code", "Confirm business purpose and private-use apportionment.", "Medium"],
+  ["R14", "GST code inconsistent with source", "Check the sales or purchase GST code.", "Medium"],
+  ["R15", "Possible entertainment with GST claimed", "Confirm business purpose, attendees and circumstances. GST is generally not claimable on non-deductible entertainment.", "Medium"],
+  ["R16", "Possible personal or private expenditure", "Confirm business purpose with the client. If private, post to drawings or the loan account and reverse any GST credit.", "Medium"],
+  ["R17", "No-GST tax code but GST recorded", "Coded GST Free, BAS Excluded or Input Taxed but GST has been recorded. Remove the GST or change the tax code to match the supply.", "High"],
+  ["R18", "Financial supply carrying GST", "Bank fees and interest are generally input taxed with no GST credit. Check the statement and remove the GST.", "High"],
+  ["R19", "Wages, super or PAYG carrying GST", "Wages, super and PAYG are BAS Excluded. Remove the GST.", "High"],
+  ["R20", "GST claimed in a private, loan or pass-through account", "GST credits are not available on private spending, or on costs paid for another entity and reimbursed. Reverse the GST.", "High"],
+  ["R21", "Loan or finance repayment carrying GST", "Loan repayments carry no GST. Any GST credit belongs to the original purchase invoice. Check the finance contract.", "High"],
+  ["R22", "Unrecognised GST rate name", "Tax code is not a standard Xero code and the export has no GST Rate column. Confirm its GST treatment.", "Medium"],
+  ["R23", "New loan or finance drawn", "A new loan or finance amount was drawn this period. This usually means an asset was bought. Obtain the tax invoice and finance contract, check the GST claimed and whether the car limit applies.", "High"],
+  ["R24", "Donation carrying GST", "Donations are not a purchase and carry no GST credit. Remove the GST.", "High"],
+  ["R25", "Possible missed GST credit", "Ordinary purchase coded GST Free. Check the tax invoice. If GST was charged, recode to GST on Expenses.", "Low"],
+  ["R26", "Food retailer with GST on the full amount", "Supermarket, butcher and bakery receipts are mostly GST-free food. GST has been claimed on the whole amount. Check the receipt and split the GST and GST-free items. Gift cards carry no GST.", "Medium"],
+  ["R27", "Training or first aid course carrying GST", "Accredited courses and first aid training are often GST-free. Check the invoice shows GST before claiming it.", "Medium"],
+  ["R28", "BAS Excluded used on a supplier purchase", "Supplier purchases should be GST on Expenses or GST Free, not BAS Excluded. BAS Excluded leaves the purchase out of G11 and may miss a GST credit. Check the tax invoice and recode.", "Medium"],
+  ["R30", "Entertainment-type purchase outside the Entertainment account", "This looks like entertainment (cafe, club, bottle shop, brewery) but is coded elsewhere, often Staff Amenities. Confirm and recode to Entertainment. Check the GST treatment at the same time.", "Medium"],
+  ["R31", "Small purchase in a fixed asset account", "Purchases under the threshold usually belong in an expense account (repairs, low cost write-off or low value tools), not a fixed asset account. Confirm and recode.", "Low"],
+  ["R33", "Capital purchase coded GST on Expenses", "This purchase sits in a fixed asset account but is coded GST on Expenses, so it reports at G11 instead of G10 on the BAS. Recode to GST on Capital.", "Medium"],
+  ["R34", "Vehicle bought in several payments near or above the car limit", "Payments to the same supplier in a vehicle asset account add up to 90% or more of the car limit. Confirm whether this is one car (designed to carry under 1 tonne and fewer than 9 passengers). If it is, cap the total GST credit at one-eleventh of the car limit.", "High"],
+  ["R35", "Accommodation that may be private", "Accommodation with leisure wording, or with no business reason recorded. Confirm who stayed and why. If private, post to drawings or the loan account and reverse any GST credit. Ask the client to note the business purpose on future bookings.", "Medium"],
+  ["R32", "Insurance claim payout coded to an expense account", "Insurance claim payouts should not reduce an expense account. Check whether this relates to an asset disposal or a gain on sale, and confirm the GST treatment of the settlement.", "Medium"],
+];
+const R = Object.fromEntries(RULES.map(x => [x[0], { issue: x[1], action: x[2], priority: x[3] }]));
+
+const findings = [], byRow = new Map();
+function flag(t, id) {
+  const v = t.v, r = R[id];
+  findings.push([t.row, v[col.Date], T(v[col.Source]), T(v[col.Description]), refCol >= 0 ? T(v[refCol]) : "",
+    t.acc, num(v[col.Debit]), num(v[col.Credit]), num(v[col.GST]), T(v[col["GST Rate Name"]]),
+    id, r.priority, r.issue, r.action, "", "Open"]);
+  if (!byRow.has(t.row)) byRow.set(t.row, []);
+  byRow.get(t.row).push({ id, ...r });
+}
+
+const SETTLEMENT = ["payable payment", "receivable payment", "payable prepayment allocation",
+  "receivable prepayment allocation", "payable credit note allocation", "receivable credit note allocation",
+  "payable overpayment", "receivable overpayment"];
+
+// ---------- apply every rule independently ----------
+const missedSeen = new Set();
+// Receipts already split: same date and supplier with a GST-free line
+const splitReceipts = new Set();
+for (const t of tx) {
+  const c = T(t.v[col["GST Rate Name"]]); const r0 = rateCol >= 0 ? pct(t.v[rateCol]) : null;
+  if (codeType(c, c ? r0 : null) === "none") splitReceipts.add(T(t.v[col.Date]) + "|" + (norm(T(t.v[col.Description])).split(" ")[0] || ""));
+}
+for (const t of tx) {
+  const v = t.v;
+  const source = T(v[col.Source]), sl = L(source);
+  const desc = T(v[col.Description]), ref = refCol >= 0 ? T(v[refCol]) : "";
+  const dr = Math.abs(num(v[col.Debit])), cr = Math.abs(num(v[col.Credit]));
+  const gst = Math.abs(num(v[col.GST])), net = Math.max(dr, cr);
+  const code = T(v[col["GST Rate Name"]]);
+  const rate = rateCol >= 0 ? pct(v[rateCol]) : null;
+  const type = codeType(code, code ? rate : null);
+  const hasGst = gst > 0.005;
+  const text = desc + " " + ref;           // what the transaction says
+  const acc = t.acc;                       // the account it sits in
+  const isJournal = sl === "manual journal";
+  const isSettlement = SETTLEMENT.some(x => sl.startsWith(x));
+  const isSystem = any(acc + " " + desc, SETTINGS.systemRows) || /^depreciation of /i.test(desc);
+  const isPassThrough = any(acc, SETTINGS.passThroughAccounts) && !any(acc, ["income", "revenue", "sales"]) && !L(T(v[col["GST Rate Name"]])).includes("income");
+
+  // R23 runs on every row: new money borrowed (loan accounts carry no tax code)
+  if (!isSystem && cr >= SETTINGS.newLoanMin && any(acc, SETTINGS.loanAccounts) && !any(acc, SETTINGS.drawingsAccounts) && !isJournal) flag(t, "R23");
+
+  // R32 insurance payout reducing an expense account
+  const isExpenseAcc = !any(acc, ["income", "revenue", "sales", "gain", "loss on sale", "disposal", "proceeds", "loan", "suspense", "clearing", "bank", "accounts receivable", "accounts payable", "gst"]);
+  if (!isSystem && cr >= SETTINGS.insurancePayoutMin && any(text, SETTINGS.insurers) && (any(text, SETTINGS.insuranceClaim) || sl === "receive money") && isExpenseAcc) flag(t, "R32");
+
+  // R05 runs on every row (the old version could never fire)
+  if (hasGst && type === "blank" && !isSettlement && !isSystem) flag(t, "R05");
+
+  // Everything below needs a tax code. This skips bank, AR, AP and depreciation lines,
+  // which stops the same GST being flagged twice and stops depreciation noise.
+  if (type === "blank" || isSystem) continue;
+
+  // Data quality (only on GST lines, so depreciation and system postings are never flagged)
+  if (!desc) flag(t, "R01");
+  if (!source) flag(t, "R02");
+  if (dr > 0.005 && cr > 0.005) flag(t, "R03");
+  if (dr <= 0.005 && cr <= 0.005 && !hasGst) flag(t, "R04");
+
+  const saleLine = L(code).includes("income") || any(acc, ["income", "revenue", "sales"]);
+  if (!isSettlement && !saleLine && !isPassThrough && net >= SETTINGS.duplicateMin && dupCount.get(t.key) > 1) flag(t, "R09");
+  if (type === "unknown") flag(t, "R22");
+
+  // GST coding
+  if (type === "gst" && !hasGst && net > 0.005) flag(t, "R06");
+  if (gst > net + 0.01) flag(t, "R07");
+  if (type === "gst" && net > 0.005 && hasGst) {
+    const r = rate && rate > 0 ? rate / 100 : 0.1;
+    const expected = net * r, tol = Math.max(SETTINGS.gstToleranceMin, expected * SETTINGS.gstTolerancePct);
+    if (Math.abs(gst - expected) > tol) flag(t, "R08");
+  }
+  if (type === "none" && hasGst) flag(t, "R17");
+
+  // GST treatment: these supplies should not carry GST (purchase side only, never sales)
+  const isSale = L(code).includes("income") || any(acc, ["income", "revenue", "sales"]) || sl.startsWith("receivable invoice");
+  const claimsGst = (hasGst || type === "gst") && !isSale;
+  const govText = any(text, SETTINGS.government) || (any(text, SETTINGS.councilWords) && any(text, SETTINGS.councilCharges));
+  if (claimsGst && (govText || any(acc, SETTINGS.governmentAccounts))) flag(t, "R10");
+  if (claimsGst && any(text, SETTINGS.overseas)) flag(t, "R11");
+  if (claimsGst && any(text, SETTINGS.financial) && !any(text, SETTINGS.financialExclude)) flag(t, "R18");
+  if (claimsGst && (any(text, SETTINGS.wages) || any(acc, SETTINGS.wagesAccounts))) flag(t, "R19");
+  if (hasGst && (any(acc, SETTINGS.drawingsAccounts) || isPassThrough)) flag(t, "R20");
+  if (hasGst && !isJournal && any(text, SETTINGS.loans) && !any(text, SETTINGS.loansExclude)) flag(t, "R21");
+  if (claimsGst && (any(text, SETTINGS.donations) || any(acc, SETTINGS.donationAccounts))) flag(t, "R24");
+
+  // Vehicle purchase near or above the car limit: vehicle account, or vehicle wording in any account
+  const fyStart = t.dt.getUTCMonth() >= 6 ? t.dt.getUTCFullYear() : t.dt.getUTCFullYear() - 1;
+  const known = Object.keys(SETTINGS.carLimits).map(Number).sort((a, b) => a - b);
+  const limit = SETTINGS.carLimits[fyStart] ?? SETTINGS.carLimits[known[known.length - 1]];
+  const vehicleRow = any(acc, SETTINGS.carAccounts) || any(text, SETTINGS.vehicleWords);
+  if (hasGst && dr >= limit * SETTINGS.carLimitWarnPct && vehicleRow) flag(t, "R12");
+
+  // Private-use wording with a business GST code
+  if (type === "gst" && !isSale && !isPassThrough && any(text, SETTINGS.privateUse)) flag(t, "R13");
+
+  // Direction mismatch
+  const buying = sl === "spend money" || sl.startsWith("payable");
+  const selling = sl === "receive money" || sl.startsWith("receivable");
+  const cl = L(code);
+  if (!isSettlement && !any(text, ["refund", "refunded", "reversal", "reversed", "credit note"]) && ((buying && cl.includes("income")) || (selling && (cl.includes("expenses") || cl.includes("capital"))))) flag(t, "R14");
+
+  // Entertainment and personal (separate findings)
+  const aboveMin = net >= SETTINGS.minAmountEntertainmentPersonal;
+  const entByText = any(text, SETTINGS.entertainment);
+  const entByAccount = any(acc, SETTINGS.entertainmentAccounts);
+  const amenitiesOnly = !entByText && any(acc, ["staff amenities", "amenities"]) && !any(acc, ["entertainment"]);
+  const isTravel = !entByAccount && (any(acc, SETTINGS.travelAccounts) || any(text, SETTINGS.travelWords));
+  const isEnt = !isTravel && (entByText || entByAccount) && !any(text, SETTINGS.entertainmentExclude) && !(amenitiesOnly && net < SETTINGS.amenitiesMin)
+    && !(entByText && !entByAccount && any(acc, SETTINGS.entertainmentExcludeAccounts));
+  if (!isJournal && !isPassThrough && claimsGst && isEnt && aboveMin) flag(t, "R15");
+  const inPrivateAccount = any(acc, SETTINGS.drawingsAccounts) || any(acc, SETTINGS.loanAccounts) || isPassThrough;   // already posted privately or passed through
+  const alreadyTreated = any(acc, ["entertainment", "non deductible entertainment", "gifts", "suspense"]);
+  const personalHit = !alreadyTreated && (any(text, SETTINGS.personal) || (any(text, SETTINGS.supermarkets) && !any(acc, SETTINGS.businessConsumableAccounts)));
+  if (!isJournal && !isSale && !inPrivateAccount && aboveMin && personalHit && !any(text + " " + acc, SETTINGS.personalExclude)) flag(t, "R16");
+
+  const accName = norm(acc.replace(/^[\w.]+\s*-\s*/, ""));     // account name without its code
+  const isPurchaseLine = SETTINGS.missedCreditSources.some(x => sl.startsWith(x)) && dr > 0.005 && !isJournal;
+
+  // R26 food retailer with GST on (nearly) the full amount, unless the receipt was already split
+  const firstWord = norm(desc).split(" ")[0] || "";
+  if (!splitReceipts.has(T(v[col.Date]) + "|" + firstWord) && type === "gst" && hasGst && any(text, SETTINGS.foodRetailers) && !any(text, SETTINGS.nonFood) && net > 0.005 && Math.abs(gst - net * 0.1) <= Math.max(0.05, net * 0.002)) flag(t, "R26");
+
+  // R27 training or first aid carrying GST
+  if (claimsGst && hasGst && any(text, SETTINGS.education) && !any(text, SETTINGS.educationExclude)) flag(t, "R27");
+
+  // R28 BAS Excluded on a supplier purchase
+  if (L(code) === "bas excluded" && isPurchaseLine && !inPrivateAccount && !any(acc + " " + text, SETTINGS.basExcludedOk) && !any(acc, SETTINGS.wagesAccounts)) flag(t, "R28");
+
+  // R30 entertainment wording outside an Entertainment account (account coding), only when R15 did not already fire
+  const r15fired = (byRow.get(t.row) || []).some(x => x.id === "R15");
+  if (!isJournal && !r15fired && !isTravel && any(text, SETTINGS.entertainmentStrong) && !any(acc, ["entertainment"]) && !any(acc, SETTINGS.entertainmentExcludeAccounts) && !inPrivateAccount && dr > 0.005) flag(t, "R30");
+
+  // R31 small purchase in a fixed asset account
+  if (isPurchaseLine && SETTINGS.assetAccounts.map(norm).includes(accName) && dr < SETTINGS.assetSmallMax) flag(t, "R31");
+
+  // R33 capital purchase coded GST on Expenses (wrong BAS label: G11 instead of G10)
+  const isAssetAcc = SETTINGS.assetAccounts.map(norm).includes(accName) || / at cost$/.test(" " + accName);
+  if (isAssetAcc && L(code) === "gst on expenses" && dr >= SETTINGS.assetSmallMax) flag(t, "R33");
+
+  // R35 accommodation that may be private (leisure wording, or no business reason recorded)
+  const r16fired = (byRow.get(t.row) || []).some((x) => x.id === "R16");
+  const isAccom = any(text, SETTINGS.accommodation) || any(acc, SETTINGS.accommodationAccounts);
+  const accomBarWords = isAccom && any(text, ["bar", "bistro", "restaurant", "dining", "meal", "meals", "drinks", "lunch", "dinner"]) && !any(text, ["accommodation", "accom", "room", "nights", "night", "stay"]);
+  if (!isJournal && !isSale && !inPrivateAccount && !r16fired && dr > 0.005 && isAccom && !accomBarWords
+      && (any(text, SETTINGS.leisureWords) || !any(text, SETTINGS.businessPurpose))) flag(t, "R35");
+
+  // Possible missed GST credit: ordinary purchase coded with no GST
+  const isPurchase = SETTINGS.missedCreditSources.some(x => sl.startsWith(x)) && dr > 0.005;
+  if (type === "none" && L(code) !== "bas excluded" && !hasGst && isPurchase && !isJournal && dr >= SETTINGS.missedCreditMin && !govText && !any(acc + " " + text, SETTINGS.missedCreditSkip)
+      && !any(text, SETTINGS.overseas) && !any(text, SETTINGS.financial)
+      && !any(text, SETTINGS.wages) && !inPrivateAccount && !any(text, SETTINGS.personal) && !any(text, SETTINGS.supermarkets)) {
+    const supplier = norm(desc.replace(/^payment:\s*/i, ""));
+    if (!missedSeen.has(supplier)) { missedSeen.add(supplier); flag(t, "R25"); }   // once per supplier
+  }
+}
+// R34 vehicle bought in several payments: total per supplier in a vehicle asset account
+{
+  const vehAcc = SETTINGS.vehicleAssetAccounts.map(norm);
+  const groups = new Map();
+  for (const t of tx) {
+    const v = t.v, code = T(v[col["GST Rate Name"]]), r0 = rateCol >= 0 ? pct(v[rateCol]) : null;
+    if (codeType(code, code ? r0 : null) !== "gst") continue;
+    const dr = Math.abs(num(v[col.Debit])), gst = Math.abs(num(v[col.GST]));
+    if (dr <= 0.005 || gst <= 0.005) continue;
+    const accName = norm(t.acc.replace(/^[\w.]+\s*-\s*/, ""));
+    const vehicleAsset = vehAcc.includes(accName) || (/ at cost$/.test(" " + accName) && any(t.acc, SETTINGS.carAccounts));
+    if (!vehicleAsset || any(t.acc + " " + T(v[col.Description]), SETTINGS.systemRows)) continue;
+    const d = T(v[col.Description]).replace(/^payment:\s*/i, "");
+    const supplier = norm(d.split(" - ")[0]).split(" ").slice(0, 3).join(" ");
+    const key = accName + "|" + supplier;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push({ t, dr });
+  }
+  const known = Object.keys(SETTINGS.carLimits).map(Number).sort((a, b) => a - b);
+  for (const list of groups.values()) {
+    if (list.length < 2) continue;
+    const dt = list[0].t.dt, fyStart = dt.getUTCMonth() >= 6 ? dt.getUTCFullYear() : dt.getUTCFullYear() - 1;
+    const limit = SETTINGS.carLimits[fyStart] ?? SETTINGS.carLimits[known[known.length - 1]];
+    const total = list.reduce((s, x) => s + x.dr, 0);
+    const alreadyR12 = list.some((x) => (byRow.get(x.t.row) || []).some((f) => f.id === "R12"));
+    if (total >= limit * SETTINGS.carLimitWarnPct && !alreadyR12) list.forEach((x) => flag(x.t, "R34"));
+  }
+}
+findings.sort((a, b) => a[0] - b[0] || a[10].localeCompare(b[10]));
+const skipped = [];   // rows that look like transactions but whose date could not be read
+for (let r = headerRow + 1; r < vals.length; r++) {
+  const row = vals[r] || [];
+  if (!toDate(row[col.Date]) && T(row[col.Date]) && (num(row[col.Debit]) || num(row[col.Credit])) && T(row[col.Source])) skipped.push(r + 1);
+}
+const gstAtRisk = Math.round([...byRow.keys()].reduce((s, rowNo) => { const t = tx.find(x => x.row === rowNo); return s + Math.abs(num(t.v[col.GST])); }, 0) * 100) / 100;
+// Title rows above the headings (Xero puts report name, client and period there)
+const titles = vals.slice(0, headerRow).map(r => T((r || [])[0])).filter(Boolean);
+return { version: GLR_VERSION, headerRow, hdr, col, tx, findings, byRow, RULES, skipped, gstAtRisk, titles, settings: SETTINGS };
+}
+
+// ===== General Ledger Reviewer page =====
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const OUT_SHEETS = ["Summary", "Discrepancies & Actions", "Full General Ledger", "Changed", "Removed or Added"];
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const MON = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, sept: 8, oct: 9, nov: 10, dec: 11 };
+const T = (v) => String(v ?? "").trim();
+const num = (v) => { if (typeof v === "number") return v; const s = T(v); const neg = /^\(.*\)$/.test(s); const n = Number(s.replace(/[$,()\s]/g, "")); return Number.isFinite(n) ? (neg ? -n : n) : 0; };
+const money = (n) => (n < 0 ? "-" : "") + "$" + Math.abs(n).toLocaleString("en-AU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const normTxt = (v) => T(v).toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+
+// Any Excel value, Date, serial number or "6 Jul 2026" text -> Date (UTC) or null
+function asDate(v) {
+  if (v instanceof Date && !isNaN(v)) return v;
+  if (typeof v === "number" && v > 20000 && v < 80000) return new Date(Math.round((v - 25569) * 86400000));
+  const s = T(v); let m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+  if (m) { let y = +m[3]; if (y < 100) y += 2000; return new Date(Date.UTC(y, +m[2] - 1, +m[1])); }
+  m = s.match(/^(\d{1,2})[\s\-]([A-Za-z]{3,4})[A-Za-z]*[\s\-,]+(\d{2,4})$/);
+  if (m && MON[m[2].toLowerCase()] !== undefined) { let y = +m[3]; if (y < 100) y += 2000; return new Date(Date.UTC(y, MON[m[2].toLowerCase()], +m[1])); }
+  return null;
+}
+const fmtDate = (v) => { const d = asDate(v); return d ? `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()].slice(0, 3)} ${d.getUTCFullYear()}` : esc(T(v)); };
+const ymd = (d) => `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, "0")}${String(d.getUTCDate()).padStart(2, "0")}`;
+const longDate = (d) => `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+
+// ---------- reading files ----------
+function cellVal(v) {
+  if (v === null || v === undefined) return "";
+  if (v instanceof Date) return v;
+  if (typeof v === "object") {
+    if ("result" in v) return cellVal(v.result);
+    if (Array.isArray(v.richText)) return v.richText.map((t) => t.text).join("");
+    if ("text" in v) return cellVal(v.text);
+    return "";
+  }
+  return v;
+}
+function parseCSV(text) {
+  const rows = []; let row = [], cur = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; }
+    else if (c === '"') q = true;
+    else if (c === ",") { row.push(cur); cur = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && text[i + 1] === "\n") i++; row.push(cur); rows.push(row); row = []; cur = ""; }
+    else cur += c;
+  }
+  if (cur !== "" || row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+async function readSheets(file) {
+  const n = file.name.toLowerCase();
+  if (n.endsWith(".csv")) return [{ name: file.name.replace(/\.csv$/i, ""), vals: parseCSV(await file.text()) }];
+  if (n.endsWith(".xls")) throw new Error("This is an older .xls file. Open it in Excel, save it as .xlsx, then drop it in again.");
+  if (!/\.xls[xm]$/.test(n)) throw new Error("That file isn't an Excel or CSV file. Export the General Ledger Detail from Xero as Excel and try again.");
+  if (!window.ExcelJS) throw new Error("The Excel reader didn't load. Check the internet connection and refresh the page.");
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.load(await file.arrayBuffer());
+  return wb.worksheets.map((ws) => {
+    const vals = []; const rc = ws.rowCount, cc = Math.min(ws.columnCount, 60);
+    for (let r = 1; r <= rc; r++) { const row = ws.getRow(r); const a = []; for (let c = 1; c <= cc; c++) a.push(cellVal(row.getCell(c).value)); vals.push(a); }
+    return { name: ws.name, vals };
+  });
+}
+// Picks the General Ledger Detail sheet (by name first, then any sheet with the right headings)
+function reviewFile(sheets) {
+  const order = [...sheets].filter((s) => !OUT_SHEETS.includes(s.name))
+    .sort((a, b) => (/general ledger detail/i.test(b.name) ? 1 : 0) - (/general ledger detail/i.test(a.name) ? 1 : 0));
+  for (const s of order) { const res = reviewLedger(s.vals); if (res) return { sheet: s, res }; }
+  return null;
+}
+function metaFrom(res, fileName) {
+  const t = res.titles; const meta = { client: "", period: "", basis: "", end: null };
+  const periodLine = t.find((x) => /for the period|as at/i.test(x)) || "";
+  meta.period = periodLine.replace(/^for the period\s*/i, "");
+  const m = periodLine.match(/to\s+(\d{1,2}\s+\w+\s+\d{4})\s*$/i) || periodLine.match(/as at\s+(\d{1,2}\s+\w+\s+\d{4})/i);
+  if (m) meta.end = asDate(m[1]);
+  meta.basis = t.find((x) => /basis/i.test(x)) || "";
+  const iTitle = t.findIndex((x) => /general ledger/i.test(x));
+  const cands = t.filter((x, i) => i > iTitle && !/general ledger|for the period|as at|basis/i.test(x));
+  meta.client = cands[0] || "";
+  meta.fileName = fileName;
+  return meta;
+}
+
+// ---------- review tab ----------
+let current = null, view = { pri: "", rule: "", q: "", limit: 200 };
+const RULE_REF = (reviewLedger([["Date", "Source", "Description", "Debit", "Credit", "GST", "GST Rate Name"]]) || {}).RULES || [];
+
+function setupDrop(label, input, onFiles) {
+  ["dragenter", "dragover"].forEach((e) => label.addEventListener(e, (ev) => { ev.preventDefault(); label.classList.add("over"); }));
+  ["dragleave", "drop"].forEach((e) => label.addEventListener(e, () => label.classList.remove("over")));
+  label.addEventListener("drop", (ev) => { ev.preventDefault(); if (ev.dataTransfer.files[0]) onFiles(ev.dataTransfer.files[0]); });
+  label.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); input.click(); } });
+  input.addEventListener("change", () => { if (input.files[0]) onFiles(input.files[0]); input.value = ""; });
+}
+function say(el, html, cls) { el.innerHTML = html ? `<div class="msg ${cls || "info"}">${html}</div>` : ""; }
+
+async function loadReview(file) {
+  const msg = $("#reviewMsg");
+  say(msg, `<span class="spinner"></span>Reading ${esc(file.name)}`); $("#results").hidden = true; $("#fileInfo").innerHTML = "";
+  try {
+    await new Promise((r) => setTimeout(r, 30));
+    const sheets = await readSheets(file);
+    const got = reviewFile(sheets);
+    if (!got) throw new Error("No General Ledger headings found. The file needs Date, Source, Description, Debit, Credit, GST (or Tax) and GST Rate Name (or Tax Rate Name) columns. Export the General Ledger Detail report from Xero and try again.");
+    const meta = metaFrom(got.res, file.name);
+    current = { ...got, meta };
+    say(msg, "");
+    $("#dropReview").classList.add("done");
+    $("#dropReviewTitle").textContent = file.name;
+    $("#dropReviewHint").textContent = "Drop another file to review a different ledger";
+    $("#fileInfo").innerHTML = [meta.client && `<span class="tag"><b>Client</b> ${esc(meta.client)}</span>`, meta.period && `<span class="tag"><b>Period</b> ${esc(meta.period)}</span>`,
+      meta.basis && `<span class="tag">${esc(meta.basis)}</span>`, `<span class="tag"><b>Sheet</b> ${esc(got.sheet.name)}</span>`, `<span class="tag"><b>Transactions</b> ${got.res.tx.length.toLocaleString("en-AU")}</span>`].filter(Boolean).join("");
+    view = { pri: "", rule: "", q: "", limit: 200 }; $("#q").value = "";
+    document.querySelectorAll(".chip[data-pri]").forEach((c) => c.setAttribute("aria-pressed", c.dataset.pri === "" ? "true" : "false"));
+    renderResults();
+  } catch (e) { current = null; say(msg, esc(e.message), "err"); }
+}
+
+function renderResults() {
+  const { res, meta } = current; const f = res.findings;
+  const pri = { High: 0, Medium: 0, Low: 0 }; f.forEach((x) => pri[x[11]]++);
+  const rows = res.byRow.size;
+  $("#headline").innerHTML = rows ? `<b>${rows.toLocaleString("en-AU")}</b> ${rows === 1 ? "row" : "rows"} to check before the BAS` : "Nothing flagged in this ledger";
+  $("#headSub").textContent = rows
+    ? `${res.tx.length.toLocaleString("en-AU")} transactions reviewed${meta.client ? " for " + meta.client : ""}. Work through the high priority items first: they change the GST figures.`
+    : `${res.tx.length.toLocaleString("en-AU")} transactions reviewed. None matched a rule. That isn't a sign-off: suppliers that aren't on a keyword list can't be caught.`;
+  $("#figs").innerHTML = [[pri.High, "High priority"], [f.length, "Rule matches"], [money(res.gstAtRisk), "GST on flagged rows"]].map(([n, l]) => `<div class="fig"><div class="n">${typeof n === "number" ? n.toLocaleString("en-AU") : n}</div><div class="l">${l}</div></div>`).join("");
+  const tot = f.length || 1;
+  $("#pbar").innerHTML = f.length ? `<span class="h" style="width:${pri.High / tot * 100}%"></span><span class="m" style="width:${pri.Medium / tot * 100}%"></span><span class="lo" style="width:${pri.Low / tot * 100}%"></span>` : "";
+  $("#pbar").hidden = !f.length; $("#legend").hidden = !f.length;
+  $("#legend").innerHTML = `<span><i style="background:var(--gl-warn)"></i>High ${pri.High}</span><span><i style="background:var(--ix-sage)"></i>Medium ${pri.Medium}</span><span><i style="background:var(--gl-low)"></i>Low ${pri.Low}</span>`;
+  const d = meta.end || new Date();
+  $("#outName").value = `${ymd(d)} - BAS - General Ledger Review`;
+  const sk = $("#skipped");
+  if (res.skipped.length) { sk.hidden = false; sk.innerHTML = `<div class="msg err">Some rows look like transactions but their date couldn't be read, so they weren't reviewed: rows ${res.skipped.slice(0, 30).join(", ")}${res.skipped.length > 30 ? " and more" : ""}. Check those rows in the export.</div>`; }
+  else { sk.hidden = true; sk.innerHTML = ""; }
+  // rule list
+  const counts = {}; f.forEach((x) => (counts[x[10]] = (counts[x[10]] || 0) + 1));
+  const used = res.RULES.filter((r) => counts[r[0]]);
+  $("#ruleList").innerHTML = used.length ? used.map((r) => `<li><button data-rule="${r[0]}" aria-pressed="${view.rule === r[0]}"><span class="rid">${r[0]}</span><span class="rn">${esc(r[1])}</span><span class="rc">${counts[r[0]]}</span></button></li>`).join("") : `<li class="none">No rules matched.</li>`;
+  $("#results").hidden = false;
+  renderRows();
+}
+function filtered() {
+  const q = normTxt(view.q);
+  return current.res.findings.filter((x) => (!view.pri || x[11] === view.pri) && (!view.rule || x[10] === view.rule) &&
+    (!q || normTxt([x[3], x[4], x[5], x[9], x[10], x[12]].join(" ")).includes(q)));
+}
+function renderRows() {
+  const list = filtered(); const shown = list.slice(0, view.limit);
+  $("#count").textContent = list.length === current.res.findings.length ? `${list.length.toLocaleString("en-AU")} items` : `${list.length.toLocaleString("en-AU")} of ${current.res.findings.length.toLocaleString("en-AU")} items`;
+  $("#rows").innerHTML = shown.length ? shown.map((x) => `<tr><td>${x[0]}</td><td style="white-space:nowrap">${fmtDate(x[1])}</td><td class="desc">${esc(x[3])}${x[4] ? `<span class="ref">${esc(x[4])}</span>` : ""}<span class="ref">${esc(x[2])}</span></td><td>${esc(x[5])}</td><td class="num">${money(x[8])}</td><td>${esc(x[9])}</td><td><span class="pri ${x[11]}">${x[11]}</span></td><td class="what"><span class="issue">${x[10]} ${esc(x[12])}</span><span class="act">${esc(x[13])}</span></td></tr>`).join("")
+    : `<tr><td colspan="8" class="empty">${current.res.findings.length ? "Nothing matches these filters." : "Nothing to check."}</td></tr>`;
+  $("#moreWrap").hidden = list.length <= view.limit;
+}
+document.querySelectorAll(".chip[data-pri]").forEach((c) => c.addEventListener("click", () => {
+  view.pri = c.dataset.pri; view.limit = 200;
+  document.querySelectorAll(".chip[data-pri]").forEach((o) => o.setAttribute("aria-pressed", o === c ? "true" : "false")); renderRows();
+}));
+$("#ruleList").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-rule]"); if (!b) return;
+  view.rule = view.rule === b.dataset.rule ? "" : b.dataset.rule; view.limit = 200;
+  document.querySelectorAll("#ruleList button").forEach((o) => o.setAttribute("aria-pressed", o.dataset.rule === view.rule ? "true" : "false")); renderRows();
+});
+$("#q").addEventListener("input", (e) => { view.q = e.target.value; view.limit = 200; renderRows(); });
+$("#more").addEventListener("click", () => { view.limit += 400; renderRows(); });
+
+// ---------- Excel output ----------
+const XL = { font: { name: "Century Gothic", size: 10, color: { argb: "FF414042" } }, head: { name: "Century Gothic", size: 10, bold: true, color: { argb: "FFFFFFFF" } },
+  headFill: { type: "pattern", pattern: "solid", fgColor: { argb: "FF56776C" } }, flagFill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFFBF3EC" } },
+  highFill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFF3DFCC" } }, tint: { type: "pattern", pattern: "solid", fgColor: { argb: "FFEAF0EE" } } };
+const xlDate = (v) => { const d = asDate(v); return d || T(v); };
+function sheetTable(ws, headers, rows, widths, opts = {}) {
+  ws.addRow(headers);
+  const h = ws.getRow(1); h.eachCell((c) => { c.font = XL.head; c.fill = XL.headFill; c.alignment = { vertical: "middle", wrapText: true }; }); h.height = 22;
+  rows.forEach((r) => ws.addRow(r));
+  ws.columns.forEach((col, i) => { col.width = widths[i] || 14; });
+  ws.eachRow((row, n) => { if (n > 1) row.eachCell({ includeEmpty: true }, (c) => { c.font = XL.font; if (c.value instanceof Date) c.numFmt = "d mmm yyyy"; else if (typeof c.value === "number" && opts.money && opts.money.includes(c.col - 1)) c.numFmt = "#,##0.00;-#,##0.00"; c.alignment = { vertical: "top", wrapText: !!(opts.wrap && opts.wrap.includes(c.col - 1)) }; }); });
+  ws.views = [{ state: "frozen", ySplit: 1 }];
+  ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: headers.length } };
+}
+async function saveWorkbook(wb, name) {
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = (T(name) || "General Ledger Review").replace(/[\\/:*?"<>|]+/g, "-") + ".xlsx";
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+async function downloadReview() {
+  const btn = $("#dlReview"); btn.disabled = true; const old = btn.textContent; btn.textContent = "Building the workbook";
+  try {
+    const { res, meta, sheet } = current; const f = res.findings;
+    const wb = new ExcelJS.Workbook(); wb.creator = "Indepth Accounting"; wb.created = new Date();
+    const sm = wb.addWorksheet("Summary", { views: [{ showGridLines: false }] });
+    const pri = (p) => f.filter((x) => x[11] === p).length;
+    const lines = [["General Ledger Review", ""], ["Client", meta.client || "[Client name]"], ["Period", meta.period || ""], ["Basis", meta.basis || ""], ["Source file", meta.fileName], ["Source worksheet", sheet.name],
+      ["Reviewed on", longDate(new Date(Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())))], ["Rules version", res.version], ["", ""],
+      ["Transactions reviewed", res.tx.length], ["Flagged rows", res.byRow.size], ["Rule matches", f.length], ["High priority", pri("High")], ["Medium priority", pri("Medium")], ["Low priority", pri("Low")],
+      ["GST on flagged rows", res.gstAtRisk], ["Rows with a date that could not be read", res.skipped.length ? res.skipped.join(", ") : "None"], ["", ""], ["Rule", "Matches"]];
+    res.RULES.forEach((r) => lines.push([`${r[0]} ${r[1]}`, f.filter((x) => x[10] === r[0]).length]));
+    lines.push(["", ""], ["Limitations", "Keyword rules only catch suppliers and wording on the reviewer's lists. Anything not on a list is not flagged. Flagged rows are items to check, not conclusions on the client's GST position."]);
+    lines.forEach((l) => sm.addRow(l));
+    sm.getColumn(1).width = 46; sm.getColumn(2).width = 70;
+    sm.eachRow((row, n) => row.eachCell({ includeEmpty: true }, (c) => { c.font = XL.font; c.alignment = { vertical: "top", wrapText: c.col === 2 }; }));
+    sm.getCell("A1").font = { name: "Century Gothic", size: 14, bold: true, color: { argb: "FF56776C" } };
+    const ruleHead = lines.findIndex((l) => l[0] === "Rule") + 1;
+    ["A", "B"].forEach((c) => { const cell = sm.getCell(`${c}${ruleHead}`); cell.font = XL.head; cell.fill = XL.headFill; });
+    sm.getCell("B16").numFmt = "#,##0.00";
+    const dc = wb.addWorksheet("Discrepancies & Actions");
+    sheetTable(dc, ["Source Row", "Date", "Source", "Description", "Reference", "Account", "Debit", "Credit", "GST", "Current GST Treatment", "Rule ID", "Priority", "Discrepancy", "Action Required", "Reviewer Notes", "Status"],
+      f.map((x) => [x[0], xlDate(x[1]), x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10], x[11], x[12], x[13], "", "Open"]),
+      [10, 12, 18, 42, 18, 30, 12, 12, 11, 20, 8, 9, 34, 60, 30, 9], { money: [6, 7, 8], wrap: [3, 12, 13, 14] });
+    f.forEach((x, i) => { if (x[11] === "High") dc.getCell(i + 2, 12).fill = XL.highFill; dc.getCell(i + 2, 16).dataValidation = { type: "list", allowBlank: false, formulae: ['"Open,Closed"'] }; });
+    const fg = wb.addWorksheet("Full General Ledger");
+    const hdr = res.hdr; const moneyCols = ["debit", "credit", "running balance", "gst", "tax", "gross"].map((h) => hdr.findIndex((x) => x.toLowerCase() === h)).filter((i) => i >= 0).map((i) => i + 2);
+    sheetTable(fg, ["Source Row", "Account", ...hdr, "Rule ID", "Discrepancy", "Action Required"],
+      res.tx.map((t) => { const a = res.byRow.get(t.row) || []; return [t.row, t.acc, ...hdr.map((_, i) => (i === res.col.Date ? xlDate(t.v[i]) : t.v[i] ?? "")), a.map((x) => x.id).join("; "), a.map((x) => x.issue).join("; "), a.map((x) => x.action).join("; ")]; }),
+      [10, 30, ...hdr.map((h) => (/description/i.test(h) ? 42 : /account/i.test(h) ? 28 : 14)), 12, 40, 60], { money: moneyCols });
+    res.tx.forEach((t, i) => { if (res.byRow.has(t.row)) fg.getRow(i + 2).eachCell({ includeEmpty: true }, (c) => { c.fill = XL.flagFill; }); });
+    await saveWorkbook(wb, $("#outName").value);
+  } catch (e) { say($("#reviewMsg"), "The workbook couldn't be built: " + esc(e.message), "err"); }
+  btn.disabled = false; btn.textContent = old;
+}
+$("#dlReview").addEventListener("click", downloadReview);
+
+// ---------- compare tab ----------
+const cmp = { before: null, after: null, result: null, filter: "", q: "" };
+function txList(got) {
+  const { res } = got; const c = res.col;
+  return res.tx.map((t) => {
+    const v = t.v, code = T(v[c["GST Rate Name"]]), gst = Math.round(num(v[c.GST]) * 100) / 100;
+    return { row: t.row, date: ymd(t.dt), dateV: t.dt, source: T(v[c.Source]), desc: T(v[c.Description]), ref: c.Reference !== undefined ? T(v[c.Reference]) : "",
+      acc: t.acc, dr: Math.round(Math.abs(num(v[c.Debit])) * 100) / 100, cr: Math.round(Math.abs(num(v[c.Credit])) * 100) / 100, gst, code };
+  }).filter((x) => x.code || x.gst); // transaction lines only (bank, AR, AP and system GST lines carry no tax code)
+}
+function compareLedgers(b, a) {
+  const B = txList(b), A = txList(a); const used = new Set(), pairs = [];
+  const keys = [(x) => [x.date, x.source, x.ref, normTxt(x.desc)].join("|"), (x) => [x.date, x.source, x.ref, normTxt(x.desc).split(" ")[0]].join("|"), (x) => [x.date, x.source, normTxt(x.desc)].join("|")];
+  const left = new Set(B.map((_, i) => i));
+  for (const k of keys) {
+    const idx = new Map(); A.forEach((x, i) => { if (used.has(i)) return; const key = k(x); if (!idx.has(key)) idx.set(key, []); idx.get(key).push(i); });
+    for (const i of [...left]) { const list = idx.get(k(B[i])); if (list && list.length) { const j = list.shift(); used.add(j); left.delete(i); pairs.push([B[i], A[j]]); } }
+  }
+  const flagged = b.res.byRow;
+  const changed = pairs.filter(([x, y]) => x.acc !== y.acc || x.code !== y.code || x.gst !== y.gst || x.dr !== y.dr || x.cr !== y.cr)
+    .map(([x, y]) => ({ x, y, gstChange: x.code !== y.code || x.gst !== y.gst, accChange: x.acc !== y.acc, rules: (flagged.get(x.row) || []).map((r) => r.id) }))
+    .filter((c) => c.gstChange || c.accChange)
+    .sort((p, q) => p.x.date.localeCompare(q.x.date) || p.x.row - q.x.row);
+  const removed = [...left].map((i) => ({ ...B[i], rules: (flagged.get(B[i].row) || []).map((r) => r.id) }));
+  const added = A.filter((_, i) => !used.has(i));
+  return { changed, removed, added, matched: pairs.length, beforeCount: B.length, afterCount: A.length };
+}
+async function loadCompare(which, file) {
+  const msg = $("#cmpMsg"); say(msg, `<span class="spinner"></span>Reading ${esc(file.name)}`);
+  try {
+    await new Promise((r) => setTimeout(r, 30));
+    const got = reviewFile(await readSheets(file));
+    if (!got) throw new Error(`No General Ledger headings found in ${file.name}. Export the General Ledger Detail report from Xero and try again.`);
+    cmp[which] = { ...got, meta: metaFrom(got.res, file.name) };
+    $(`#drop${which === "before" ? "Before" : "After"}`).classList.add("done");
+    $(`#${which}Title`).textContent = file.name;
+    $(`#${which}Hint`).textContent = `${got.res.tx.length.toLocaleString("en-AU")} transactions read`;
+    say(msg, "");
+    if (cmp.before && cmp.after) runCompare(); else say(msg, `Now drop in the ${which === "before" ? "after" : "before"} file.`);
+  } catch (e) { say(msg, esc(e.message), "err"); }
+}
+function runCompare() {
+  const r = compareLedgers(cmp.before, cmp.after); cmp.result = r;
+  const caught = r.changed.filter((c) => c.rules.length).length;
+  $("#cmpHeadline").innerHTML = r.changed.length ? `The reviewer flagged <b>${caught} of ${r.changed.length}</b> changed transactions` : "No coding changes between these ledgers";
+  $("#cmpSub").textContent = r.changed.length ? "A change counts when the account, tax code or GST is different in the corrected ledger. Flagged means the reviewer raised it in the before file." : "Both ledgers have the same accounts, tax codes and GST on every matched transaction.";
+  $("#cmpFigs").innerHTML = [[r.matched, "Transactions matched"], [r.changed.length, "Changed"], [r.removed.length, "Replaced or removed"], [r.added.length, "Added"]].map(([n, l]) => `<div class="fig"><div class="n">${n.toLocaleString("en-AU")}</div><div class="l">${l}</div></div>`).join("");
+  const d = cmp.after.meta.end || cmp.before.meta.end || new Date();
+  $("#cmpName").value = `${ymd(d)} - BAS - General Ledger Comparison`;
+  cmp.filter = ""; cmp.q = ""; $("#cq").value = "";
+  document.querySelectorAll(".cchip").forEach((c) => c.setAttribute("aria-pressed", c.dataset.c === "" ? "true" : "false"));
+  $("#cmpResults").hidden = false; renderCompare();
+}
+const cell = (b, a, f) => (b === a ? esc(f ? f(a) : a) : `<span class="was">${esc(f ? f(b) : b) || "blank"}</span><span class="arrow">to</span>${esc(f ? f(a) : a) || "blank"}`);
+function renderCompare() {
+  const q = normTxt(cmp.q);
+  const list = cmp.result.changed.filter((c) => (!cmp.filter || (cmp.filter === "yes" ? c.rules.length : !c.rules.length)) && (!q || normTxt([c.x.desc, c.x.acc, c.y.acc, c.x.ref].join(" ")).includes(q)));
+  $("#cCount").textContent = `${list.length} of ${cmp.result.changed.length} changes`;
+  $("#cRows").innerHTML = list.length ? list.map((c) => `<tr><td style="white-space:nowrap">${fmtDate(c.x.dateV)}</td><td>${esc(c.x.desc)}${c.x.ref ? `<span class="ref">${esc(c.x.ref)}</span>` : ""}</td><td>${cell(c.x.acc, c.y.acc)}</td><td>${cell(c.x.code, c.y.code)}</td><td class="num">${cell(c.x.gst, c.y.gst, money)}</td><td>${c.rules.length ? `<span class="yes">Flagged ${esc(c.rules.join(", "))}</span>` : `<span class="no">Not flagged</span>`}</td></tr>`).join("")
+    : `<tr><td colspan="6" class="empty">Nothing matches these filters.</td></tr>`;
+}
+document.querySelectorAll(".cchip").forEach((c) => c.addEventListener("click", () => { cmp.filter = c.dataset.c; document.querySelectorAll(".cchip").forEach((o) => o.setAttribute("aria-pressed", o === c ? "true" : "false")); renderCompare(); }));
+$("#cq").addEventListener("input", (e) => { cmp.q = e.target.value; renderCompare(); });
+async function downloadCompare() {
+  const btn = $("#dlCompare"); btn.disabled = true;
+  try {
+    const r = cmp.result; const wb = new ExcelJS.Workbook(); wb.creator = "Indepth Accounting";
+    const sm = wb.addWorksheet("Summary", { views: [{ showGridLines: false }] });
+    [["General Ledger Comparison", ""], ["Client", cmp.after.meta.client || cmp.before.meta.client || "[Client name]"], ["Before file", cmp.before.meta.fileName], ["After file", cmp.after.meta.fileName], ["Rules version", cmp.before.res.version], ["", ""],
+      ["Transactions matched", r.matched], ["Changed (account, tax code or GST)", r.changed.length], ["Flagged by the reviewer in the before file", r.changed.filter((c) => c.rules.length).length], ["Replaced or removed", r.removed.length], ["Added", r.added.length], ["", ""],
+      ["Important", "A changed tax code is not automatically right or wrong. Confirm against the tax invoice and business purpose."]].forEach((l) => sm.addRow(l));
+    sm.getColumn(1).width = 44; sm.getColumn(2).width = 70; sm.eachRow((row) => row.eachCell({ includeEmpty: true }, (c) => { c.font = XL.font; c.alignment = { wrapText: c.col === 2, vertical: "top" }; }));
+    sm.getCell("A1").font = { name: "Century Gothic", size: 14, bold: true, color: { argb: "FF56776C" } };
+    sheetTable(wb.addWorksheet("Changed"), ["Before Row", "After Row", "Date", "Source", "Description", "Reference", "Before Account", "After Account", "Before Debit", "After Debit", "Before Credit", "After Credit", "Before GST", "After GST", "Before Tax Code", "After Tax Code", "What changed", "Flagged by reviewer"],
+      r.changed.map((c) => [c.x.row, c.y.row, c.x.dateV, c.x.source, c.x.desc, c.x.ref, c.x.acc, c.y.acc, c.x.dr, c.y.dr, c.x.cr, c.y.cr, c.x.gst, c.y.gst, c.x.code, c.y.code,
+        [c.accChange && "Account", c.x.code !== c.y.code && "Tax code", c.x.gst !== c.y.gst && "GST", (c.x.dr !== c.y.dr || c.x.cr !== c.y.cr) && "Amount"].filter(Boolean).join(", "), c.rules.length ? c.rules.join(", ") : "Not flagged"]),
+      [10, 10, 12, 18, 42, 18, 28, 28, 12, 12, 12, 12, 11, 11, 18, 18, 22, 16], { money: [8, 9, 10, 11, 12, 13], wrap: [4] });
+    sheetTable(wb.addWorksheet("Removed or Added"), ["Change", "Row", "Date", "Source", "Description", "Reference", "Account", "Debit", "Credit", "GST", "Tax Code", "Flagged by reviewer"],
+      [...r.removed.map((x) => ["Replaced or removed in after", x.row, x.dateV, x.source, x.desc, x.ref, x.acc, x.dr, x.cr, x.gst, x.code, x.rules.length ? x.rules.join(", ") : "Not flagged"]),
+        ...r.added.map((x) => ["Added in after", x.row, x.dateV, x.source, x.desc, x.ref, x.acc, x.dr, x.cr, x.gst, x.code, ""])],
+      [26, 8, 12, 18, 42, 18, 28, 12, 12, 11, 18, 16], { money: [7, 8, 9], wrap: [4] });
+    await saveWorkbook(wb, $("#cmpName").value);
+  } catch (e) { say($("#cmpMsg"), "The workbook couldn't be built: " + esc(e.message), "err"); }
+  btn.disabled = false;
+}
+$("#dlCompare").addEventListener("click", downloadCompare);
+
+// ---------- tabs, reference, start ----------
+document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
+  document.querySelectorAll(".tab").forEach((o) => { const on = o === t; o.setAttribute("aria-selected", on); $("#" + o.getAttribute("aria-controls")).hidden = !on; });
+}));
+setupDrop($("#dropReview"), $("#fileReview"), loadReview);
+setupDrop($("#dropBefore"), $("#fileBefore"), (f) => loadCompare("before", f));
+setupDrop($("#dropAfter"), $("#fileAfter"), (f) => loadCompare("after", f));
+$("#ruleRef").innerHTML = RULE_REF.map((r) => `<li><b>${r[0]} ${esc(r[1])}</b> (${r[3]}). ${esc(r[2])}</li>`).join("");
+$("#foot").textContent = `Rules version ${GLR_VERSION}. This is a working paper, not a conclusion on the client's GST position. Something not working, or a miss to report? Let Lili know.`;
+
+</script>
+</body>
+</html>
