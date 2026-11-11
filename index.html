@@ -264,7 +264,7 @@ details.ref li b{color:var(--ix-ink)}
 // ===== General Ledger Reviewer engine (shared by the staff tool and the Excel skill) =====
 // reviewLedger(vals) takes the sheet as a 2D array (row 1 = vals[0]) and returns the findings.
 // Returns null when the sheet does not have General Ledger headings.
-const GLR_VERSION = "v4";
+const GLR_VERSION = "v5";
 function reviewLedger(vals) {
 // ============================== SETTINGS ==============================
 const SETTINGS = {
@@ -439,7 +439,10 @@ const SETTINGS = {
   assetAccounts: ["motor vehicles", "motor vehicle", "motor vehicles at cost", "plant and equipment",
     "plant and equipment at cost", "plant and machinery", "office equipment", "office equipment at cost",
     "computer equipment", "computer equipment at cost", "furniture and fittings", "fixtures and fittings",
-    "tools and equipment", "trucks", "truck", "trailers"],
+    "tools and equipment", "trucks", "truck", "trailers", "leasehold improvements", "leasehold improvements at cost"],
+  // R34 vehicle asset accounts (name must match exactly, ignoring the account code). Any "... at cost" account with a vehicle word also counts.
+  vehicleAssetAccounts: ["motor vehicles", "motor vehicle", "motor vehicles at cost", "motor vehicle at cost", "vehicles",
+    "vehicles at cost", "cars", "cars at cost", "trucks", "truck", "trucks at cost", "utes", "utes at cost"],
   // R32 insurers and claim wording
   insurers: ["nti", "national transport insurance", "allianz", "qbe", "suncorp", "aami", "cgu", "gio",
     "nrma", "racq", "zurich", "chubb", "vero", "youi", "budget direct", "wesfarmers insurance"],
@@ -586,6 +589,8 @@ const RULES = [
   ["R28", "BAS Excluded used on a supplier purchase", "Supplier purchases should be GST on Expenses or GST Free, not BAS Excluded. BAS Excluded leaves the purchase out of G11 and may miss a GST credit. Check the tax invoice and recode.", "Medium"],
   ["R30", "Entertainment-type purchase outside the Entertainment account", "This looks like entertainment (cafe, club, bottle shop, brewery) but is coded elsewhere, often Staff Amenities. Confirm and recode to Entertainment. Check the GST treatment at the same time.", "Medium"],
   ["R31", "Small purchase in a fixed asset account", "Purchases under the threshold usually belong in an expense account (repairs, low cost write-off or low value tools), not a fixed asset account. Confirm and recode.", "Low"],
+  ["R33", "Capital purchase coded GST on Expenses", "This purchase sits in a fixed asset account but is coded GST on Expenses, so it reports at G11 instead of G10 on the BAS. Recode to GST on Capital.", "Medium"],
+  ["R34", "Vehicle bought in several payments near or above the car limit", "Payments to the same supplier in a vehicle asset account add up to 90% or more of the car limit. Confirm whether this is one car (designed to carry under 1 tonne and fewer than 9 passengers). If it is, cap the total GST credit at one-eleventh of the car limit.", "High"],
   ["R32", "Insurance claim payout coded to an expense account", "Insurance claim payouts should not reduce an expense account. Check whether this relates to an asset disposal or a gain on sale, and confirm the GST treatment of the settlement.", "Medium"],
 ];
 const R = Object.fromEntries(RULES.map(x => [x[0], { issue: x[1], action: x[2], priority: x[3] }]));
@@ -723,6 +728,10 @@ for (const t of tx) {
   // R31 small purchase in a fixed asset account
   if (isPurchaseLine && SETTINGS.assetAccounts.map(norm).includes(accName) && dr < SETTINGS.assetSmallMax) flag(t, "R31");
 
+  // R33 capital purchase coded GST on Expenses (wrong BAS label: G11 instead of G10)
+  const isAssetAcc = SETTINGS.assetAccounts.map(norm).includes(accName) || / at cost$/.test(" " + accName);
+  if (isAssetAcc && L(code) === "gst on expenses" && dr >= SETTINGS.assetSmallMax) flag(t, "R33");
+
   // Possible missed GST credit: ordinary purchase coded with no GST
   const isPurchase = SETTINGS.missedCreditSources.some(x => sl.startsWith(x)) && dr > 0.005;
   if (type === "none" && L(code) !== "bas excluded" && !hasGst && isPurchase && !isJournal && dr >= SETTINGS.missedCreditMin && !govText && !any(acc + " " + text, SETTINGS.missedCreditSkip)
@@ -730,6 +739,34 @@ for (const t of tx) {
       && !any(text, SETTINGS.wages) && !inPrivateAccount && !any(text, SETTINGS.personal) && !any(text, SETTINGS.supermarkets)) {
     const supplier = norm(desc.replace(/^payment:\s*/i, ""));
     if (!missedSeen.has(supplier)) { missedSeen.add(supplier); flag(t, "R25"); }   // once per supplier
+  }
+}
+// R34 vehicle bought in several payments: total per supplier in a vehicle asset account
+{
+  const vehAcc = SETTINGS.vehicleAssetAccounts.map(norm);
+  const groups = new Map();
+  for (const t of tx) {
+    const v = t.v, code = T(v[col["GST Rate Name"]]), r0 = rateCol >= 0 ? pct(v[rateCol]) : null;
+    if (codeType(code, code ? r0 : null) !== "gst") continue;
+    const dr = Math.abs(num(v[col.Debit])), gst = Math.abs(num(v[col.GST]));
+    if (dr <= 0.005 || gst <= 0.005) continue;
+    const accName = norm(t.acc.replace(/^[\w.]+\s*-\s*/, ""));
+    const vehicleAsset = vehAcc.includes(accName) || (/ at cost$/.test(" " + accName) && any(t.acc, SETTINGS.carAccounts));
+    if (!vehicleAsset || any(t.acc + " " + T(v[col.Description]), SETTINGS.systemRows)) continue;
+    const d = T(v[col.Description]).replace(/^payment:\s*/i, "");
+    const supplier = norm(d.split(" - ")[0]).split(" ").slice(0, 3).join(" ");
+    const key = accName + "|" + supplier;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push({ t, dr });
+  }
+  const known = Object.keys(SETTINGS.carLimits).map(Number).sort((a, b) => a - b);
+  for (const list of groups.values()) {
+    if (list.length < 2) continue;
+    const dt = list[0].t.dt, fyStart = dt.getUTCMonth() >= 6 ? dt.getUTCFullYear() : dt.getUTCFullYear() - 1;
+    const limit = SETTINGS.carLimits[fyStart] ?? SETTINGS.carLimits[known[known.length - 1]];
+    const total = list.reduce((s, x) => s + x.dr, 0);
+    const alreadyR12 = list.some((x) => (byRow.get(x.t.row) || []).some((f) => f.id === "R12"));
+    if (total >= limit * SETTINGS.carLimitWarnPct && !alreadyR12) list.forEach((x) => flag(x.t, "R34"));
   }
 }
 findings.sort((a, b) => a[0] - b[0] || a[10].localeCompare(b[10]));
