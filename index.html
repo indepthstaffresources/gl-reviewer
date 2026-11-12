@@ -585,40 +585,40 @@ for (const t of tx) {
 
 // ---------- rule definitions: id, issue, action, priority ----------
 const RULES = [
-  ["R01", "Missing description", "Enter or obtain a description.", "Low"],
-  ["R02", "Missing source type", "Confirm the source type.", "Low"],
-  ["R03", "Debit and credit both populated", "Check why both debit and credit are populated.", "Low"],
-  ["R04", "Zero-value transaction", "Confirm whether the zero-value row should remain.", "Low"],
-  ["R05", "GST amount with no GST rate name", "GST has been recorded but no tax code is set. Confirm the GST rate name.", "High"],
-  ["R06", "GST code with zero GST", "Coded to a GST rate but no GST recorded. Check whether a tax invoice is held. If not, recode to GST Free or BAS Excluded.", "High"],
-  ["R07", "GST exceeds transaction amount", "Check amount and GST against the source document.", "High"],
-  ["R08", "GST not 10% of the net amount", "Check GST against the tax invoice and correct it in Xero.", "High"],
-  ["R09", "Exact duplicate candidate", "Check whether repeated rows are valid or duplicated.", "Medium"],
-  ["R10", "Government or statutory charge carrying GST", "Fines, rego, council, ASIC and ATO charges generally carry no GST. Check the notice component by component and remove the GST if none applies.", "High"],
-  ["R11", "Possible overseas supplier carrying GST", "Overseas suppliers often do not charge Australian GST. Check the invoice for an ABN and a GST amount before claiming.", "High"],
-  ["R12", "Vehicle purchase near or above the car limit", "Confirm whether this is a car (designed to carry under 1 tonne and fewer than 9 passengers). If it is, cap the GST credit at one-eleventh of the car limit. Utes over 1 tonne, trucks and goods vans are not capped.", "High"],
-  ["R13", "Private or mixed-use wording with a GST code", "Confirm business purpose and private-use apportionment.", "Medium"],
-  ["R14", "GST code inconsistent with source", "Check the sales or purchase GST code.", "Medium"],
-  ["R15", "Possible entertainment with GST claimed", "Confirm business purpose, attendees and circumstances. GST is generally not claimable on non-deductible entertainment.", "Medium"],
-  ["R16", "Possible personal or private expenditure", "Confirm business purpose with the client. If private, post to drawings or the loan account and reverse any GST credit.", "Medium"],
-  ["R17", "No-GST tax code but GST recorded", "Coded GST Free, BAS Excluded or Input Taxed but GST has been recorded. Remove the GST or change the tax code to match the supply.", "High"],
-  ["R18", "Financial supply carrying GST", "Bank fees and interest are generally input taxed with no GST credit. Check the statement and remove the GST.", "High"],
-  ["R19", "Wages, super or PAYG carrying GST", "Wages, super and PAYG are BAS Excluded. Remove the GST.", "High"],
-  ["R20", "GST claimed in a private, loan or pass-through account", "GST credits are not available on private spending, or on costs paid for another entity and reimbursed. Reverse the GST.", "High"],
-  ["R21", "Loan or finance repayment carrying GST", "Loan repayments carry no GST. Any GST credit belongs to the original purchase invoice. Check the finance contract.", "High"],
-  ["R22", "Unrecognised GST rate name", "Tax code is not a standard Xero code and the export has no GST Rate column. Confirm its GST treatment.", "Medium"],
-  ["R23", "New loan or finance drawn", "A new loan or finance amount was drawn this period. This usually means an asset was bought. Obtain the tax invoice and finance contract, check the GST claimed and whether the car limit applies.", "High"],
-  ["R24", "Donation carrying GST", "Donations are not a purchase and carry no GST credit. Remove the GST.", "High"],
-  ["R25", "Possible missed GST credit", "Ordinary purchase coded GST Free. Check the tax invoice. If GST was charged, recode to GST on Expenses.", "Low"],
-  ["R26", "Food retailer with GST on the full amount", "Supermarket, butcher and bakery receipts are mostly GST-free food. GST has been claimed on the whole amount. Check the receipt and split the GST and GST-free items. Gift cards carry no GST.", "Medium"],
-  ["R27", "Training or first aid course carrying GST", "Accredited courses and first aid training are often GST-free. Check the invoice shows GST before claiming it.", "Medium"],
-  ["R28", "BAS Excluded used on a supplier purchase", "Supplier purchases should be GST on Expenses or GST Free, not BAS Excluded. BAS Excluded leaves the purchase out of G11 and may miss a GST credit. Check the tax invoice and recode.", "Medium"],
-  ["R30", "Entertainment-type purchase outside the Entertainment account", "This looks like entertainment (cafe, club, bottle shop, brewery) but is coded elsewhere, often Staff Amenities. Confirm and recode to Entertainment. Check the GST treatment at the same time.", "Medium"],
-  ["R31", "Small purchase in a fixed asset account", "Purchases under the threshold usually belong in an expense account (repairs, low cost write-off or low value tools), not a fixed asset account. Confirm and recode.", "Low"],
-  ["R33", "Capital purchase coded GST on Expenses", "This purchase sits in a fixed asset account but is coded GST on Expenses, so it reports at G11 instead of G10 on the BAS. Recode to GST on Capital.", "Medium"],
-  ["R34", "Vehicle bought in several payments near or above the car limit", "Payments to the same supplier in a vehicle asset account add up to 90% or more of the car limit. Confirm whether this is one car (designed to carry under 1 tonne and fewer than 9 passengers). If it is, cap the total GST credit at one-eleventh of the car limit.", "High"],
-  ["R35", "Accommodation that may be private", "Accommodation with leisure wording, or with no business reason recorded. Confirm who stayed and why. If private, post to drawings or the loan account and reverse any GST credit. Ask the client to note the business purpose on future bookings.", "Medium"],
-  ["R32", "Insurance claim payout coded to an expense account", "Insurance claim payouts should not reduce an expense account. Check whether this relates to an asset disposal or a gain on sale, and confirm the GST treatment of the settlement.", "Medium"],
+  ["R01", "Missing description", "This GST line has no description, so nobody can tell what was bought or whether the GST treatment is right, and it won't stand up if the ATO asks. Add a description from the invoice or receipt.", "Low"],
+  ["R02", "Missing source type", "This GST line has no Source (Spend Money, Payable Invoice and so on), which usually means it was imported or keyed in unusually. Without it, it's hard to trace back to an invoice. Check where it came from and that it isn't a double-up.", "Low"],
+  ["R03", "Debit and credit both populated", "One line holding both a debit and a credit is unusual and can hide a netted amount, so the GST may have been worked out on the wrong figure. Check the original entry and split it if needed.", "Low"],
+  ["R04", "Zero-value transaction", "A GST-coded line with no amount and no GST does nothing on the BAS, but it can be a sign of a deleted or half-entered transaction. Check whether it should be there.", "Low"],
+  ["R05", "GST amount with no GST rate name", "GST has been recorded but the line has no tax code, so Xero may not report it at the right BAS label. Check the invoice and set the correct tax code.", "High"],
+  ["R06", "GST code with zero GST", "The line is coded to a GST rate but no GST was recorded, so the purchase reports at G11 with no credit at 1B, or a sale reports at G1 with no GST at 1A. Check the invoice: if GST was charged, fix the amount; if not, recode to GST Free.", "High"],
+  ["R07", "GST exceeds transaction amount", "The GST is bigger than the amount of the transaction, which can't be right and will overstate the GST at 1A or 1B. Usually a keying error. Check the invoice and correct the amount or the GST.", "High"],
+  ["R08", "GST not 10% of the net amount", "GST is normally exactly 10% of the net amount. Here it isn't, so the GST claimed or charged may be wrong. It can be right on a mixed invoice (such as rego, where only the CTP part has GST), so check the invoice and split the line if needed.", "High"],
+  ["R09", "Possible duplicate", "Another line has the same date, amount, description and reference, so this may have been entered twice, which would double the GST claimed. Check the bank statement or invoices. If it's a genuine repeat purchase, no change is needed.", "Medium"],
+  ["R10", "Government or statutory charge carrying GST", "Fines, council rates, rego fees, ASIC, ATO and stamp duty have no GST, so claiming it overstates the GST credits at 1B. Rego is the exception: the CTP part can carry GST, but not the whole payment. Check the notice and remove the GST from the parts that have none.", "High"],
+  ["R11", "Possible overseas supplier carrying GST", "Overseas suppliers usually don't charge Australian GST unless they are registered for it, so a credit claimed here may not exist and would overstate 1B. Check the invoice shows an Australian ABN or GST registration and a GST amount. If not, recode to GST Free.", "High"],
+  ["R12", "Vehicle purchase near or above the car limit", "For a car (designed to carry under 1 tonne and fewer than 9 passengers), the GST credit is capped at one-eleventh of the ATO car limit, so a credit on the full price can overstate 1B. Confirm what was bought. If it's a car, cap the credit. Utes over 1 tonne, trucks and goods vans are not capped.", "High"],
+  ["R13", "Private or mixed-use wording with a GST code", "The description suggests some private use, and GST credits are only available for the business part. Claiming the full GST overstates 1B. Confirm the business use with the client and claim only the business portion.", "Medium"],
+  ["R14", "Payment and sale coded the wrong way round", "A payment out has been coded GST on Income, or money in has been coded to a purchase code. Xero then reports it on the wrong side of the BAS: a fee netted off sales understates G1 and 1A, and isn't claimed as a purchase at G11 and 1B. This is often card or platform fees taken out of sales (Square, Stripe, PayPal). Recode fees to an expense account with GST on Expenses, and sales to GST on Income.", "Medium"],
+  ["R15", "Possible entertainment with GST claimed", "This looks like entertainment (food, drink or an event with clients or staff off premises). GST can't be claimed on entertainment that isn't tax deductible, so the credit may overstate 1B. Confirm who attended, where and why. If it's entertainment, remove the GST credit. Meals while travelling for work and light refreshments on premises are not entertainment.", "Medium"],
+  ["R16", "Possible personal or private expenditure", "The supplier or wording suggests a personal expense. Private spending isn't a business expense and has no GST credit, so it would overstate 1B and the deductions. Confirm the business purpose with the client. If private, post it to drawings or the loan account and reverse any GST.", "Medium"],
+  ["R17", "No-GST tax code but GST recorded", "The line is coded GST Free, BAS Excluded or Input Taxed, yet a GST amount has been recorded, so the GST may not report where it should, or at all. Check the invoice: if GST was charged, change the code to GST on Expenses (or Income); if not, remove the GST.", "High"],
+  ["R18", "Financial supply carrying GST", "Bank fees, interest and loan fees are input taxed, which means there is no GST in them to claim. A credit here overstates 1B. Merchant fees for card payments are different and do carry GST. Check the statement and remove the GST unless it's a merchant fee.", "High"],
+  ["R19", "Wages, super or PAYG carrying GST", "Wages, super and PAYG are not purchases from a supplier, so they have no GST and are BAS Excluded (wages go to W1). A GST credit here overstates 1B. Remove the GST and code to BAS Excluded.", "High"],
+  ["R20", "GST claimed in a private, loan or pass-through account", "This account holds private spending, a director or shareholder loan, or costs paid for another entity and reimbursed. GST credits aren't available on any of these, so the credit overstates 1B. Reverse the GST, or move the cost to the correct expense account if it's really a business cost.", "High"],
+  ["R21", "Loan or finance repayment carrying GST", "Loan and finance repayments are paying back money borrowed, not buying anything, so they carry no GST. Any GST credit belongs to the original purchase invoice for the asset. A credit on the repayments overstates 1B and can double count. Remove the GST and check the asset's tax invoice was claimed once.", "High"],
+  ["R22", "Unrecognised GST rate name", "This tax code isn't a standard Xero code and the export has no GST Rate column, so the reviewer can't tell whether it carries GST and can't run the GST checks on it. Confirm what the code is set up as in Xero.", "Medium"],
+  ["R23", "New loan or finance drawn", "A new loan or finance amount was drawn this period, which usually means an asset was bought. The GST on that purchase needs a tax invoice, and a car may be capped at the car limit. Get the tax invoice and finance contract, then check the purchase was coded correctly.", "High"],
+  ["R24", "Donation carrying GST", "A donation is a gift, not a purchase, so there is no GST to claim and the credit overstates 1B. If the payment also bought something (sponsorship, tickets, membership), only that part carries GST. Remove the GST, or split the line if part of it was a purchase.", "High"],
+  ["R25", "Possible missed GST credit", "This ordinary purchase is coded GST Free, so no credit is being claimed at 1B. If the supplier charged GST, the client is missing out. Check the invoice and whether the supplier is registered for GST (ABN Lookup). If GST was charged, recode to GST on Expenses.", "Low"],
+  ["R26", "Food retailer with GST on the full amount", "Supermarket, butcher and bakery receipts are usually a mix: basic food like milk, bread, meat and tea is GST-free, while snacks, drinks and household items aren't. GST has been claimed on the whole receipt, which overstates 1B. Check the receipt and split the GST and GST-free items. Gift cards carry no GST.", "Medium"],
+  ["R27", "Training or first aid course carrying GST", "Accredited training and first aid courses are often GST-free, so a credit may not exist and would overstate 1B. Non-accredited training does carry GST. Check the invoice shows GST before claiming it.", "Medium"],
+  ["R28", "BAS Excluded used on a supplier purchase", "BAS Excluded is for things that aren't purchases at all, like wages, loans and transfers. Used on a supplier purchase, it leaves the purchase out of G11 and may miss a GST credit at 1B. Check the invoice and recode to GST on Expenses (GST charged) or GST Free (no GST).", "Medium"],
+  ["R30", "Entertainment-type purchase outside the Entertainment account", "This looks like entertainment (cafe, club, bottle shop, brewery) but is coded to another account, often Staff Amenities. Entertainment affects both the GST credit and the tax deduction, so it needs its own account. Confirm what it was and recode to Entertainment, checking the GST at the same time.", "Medium"],
+  ["R31", "Small purchase in a fixed asset account", "Items under the threshold are usually expensed (repairs, low cost write-off or low value tools) rather than added to the asset register. Leaving them in an asset account overstates assets and depreciation. The GST is unaffected. Confirm and recode to the right expense account.", "Low"],
+  ["R33", "Capital purchase coded GST on Expenses", "This purchase sits in a fixed asset account but is coded GST on Expenses, so it reports at G11 (non-capital purchases) instead of G10 (capital purchases) on the BAS. The GST credit is the same, but the labels are wrong. Recode to GST on Capital.", "Medium"],
+  ["R34", "Vehicle bought in several payments near or above the car limit", "Payments to the same supplier in a vehicle asset account add up to 90% or more of the car limit, which usually means one vehicle paid for in parts (a deposit and a balance). For a car, the total GST credit is capped at one-eleventh of the ATO car limit, so claiming GST on every payment can overstate 1B. Confirm what was bought and cap the total credit if it's a car.", "High"],
+  ["R35", "Accommodation that may be private", "This stay has leisure wording, or no business reason recorded. Private accommodation has no GST credit and isn't deductible, so it would overstate 1B. Confirm who stayed and why. If private, post it to drawings or the loan account and reverse the GST. Ask the client to note the business reason on future bookings.", "Medium"],
+  ["R32", "Insurance claim payout coded to an expense account", "An insurance payout has been posted against an expense account, which hides the expense and understates income. If it relates to a damaged or written-off asset, it usually belongs against the asset disposal or gain on sale. Payouts generally have no GST if the insurer was told of the input tax credit entitlement. Check the claim and recode.", "Medium"],
 ];
 const R = Object.fromEntries(RULES.map(x => [x[0], { issue: x[1], action: x[2], priority: x[3] }]));
 
@@ -870,16 +870,17 @@ function parseCSV(text) {
 }
 async function readSheets(file) {
   const n = file.name.toLowerCase();
-  if (n.endsWith(".csv")) return [{ name: file.name.replace(/\.csv$/i, ""), vals: parseCSV(await file.text()) }];
+  if (n.endsWith(".csv")) return [{ name: file.name.replace(/\.csv$/i, ""), vals: parseCSV(await file.text()), csv: true }];
   if (n.endsWith(".xls")) throw new Error("This is an older .xls file. Open it in Excel, save it as .xlsx, then drop it in again.");
   if (!/\.xls[xm]$/.test(n)) throw new Error("That file isn't an Excel or CSV file. Export the General Ledger Detail from Xero as Excel and try again.");
   if (!window.ExcelJS) throw new Error("The Excel reader didn't load. Check the internet connection and refresh the page.");
   const wb = new ExcelJS.Workbook();
   await wb.xlsx.load(await file.arrayBuffer());
   return wb.worksheets.map((ws) => {
+    const src = ws;
     const vals = []; const rc = ws.rowCount, cc = Math.min(ws.columnCount, 60);
     for (let r = 1; r <= rc; r++) { const row = ws.getRow(r); const a = []; for (let c = 1; c <= cc; c++) a.push(cellVal(row.getCell(c).value)); vals.push(a); }
-    return { name: ws.name, vals };
+    return { name: ws.name, vals, ws: src };
   });
 }
 // Picks the General Ledger Detail sheet (by name first, then any sheet with the right headings)
@@ -1007,6 +1008,42 @@ async function saveWorkbook(wb, name) {
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = (T(name) || "General Ledger Review").replace(/[\\/:*?"<>|]+/g, "-") + ".xlsx";
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
+// Copies the client's ledger tab exactly (values, formulas, formats, widths, merges), then highlights flagged rows
+const FLAG_FILL = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF6C89F" } };
+function copyLedger(wb, sheet, res) {
+  const out = wb.addWorksheet("Full General Ledger");
+  const lastCol = Math.max(1, ...res.hdr.map((h, i) => (h ? i + 1 : 0)), sheet.vals.reduce((m, r) => Math.max(m, r.length), 0));
+  if (sheet.ws) {
+    const ws = sheet.ws;
+    for (let c = 1; c <= ws.columnCount; c++) { const w = ws.getColumn(c).width; if (w) out.getColumn(c).width = w; }
+    ws.eachRow({ includeEmpty: true }, (row, r) => {
+      const o = out.getRow(r); if (row.height) o.height = row.height;
+      row.eachCell({ includeEmpty: true }, (cell, c) => {
+        const t = o.getCell(c);
+        if (cell.type === ExcelJS.ValueType.Formula) t.value = { formula: cell.formula, result: cell.result };
+        else if (cell.type === ExcelJS.ValueType.Merge) { /* handled by merges below */ }
+        else t.value = cell.value;
+        if (cell.style) t.style = JSON.parse(JSON.stringify(cell.style));
+      });
+    });
+    (ws.model.merges || []).forEach((m) => { try { out.mergeCells(m); } catch (e) {} });
+    if (ws.views && ws.views.length) out.views = JSON.parse(JSON.stringify(ws.views));
+  } else {
+    sheet.vals.forEach((r) => out.addRow(r));
+  }
+  // Two columns on the right: which rules flagged the row, and what to check
+  const fc = lastCol + 1, wc = lastCol + 2, headRow = res.headerRow + 1;
+  out.getCell(headRow, fc).value = "Flagged"; out.getCell(headRow, wc).value = "What to check";
+  [fc, wc].forEach((c) => { const h = out.getCell(headRow, c); h.font = { name: "Century Gothic", size: 10, bold: true, color: { argb: "FFFFFFFF" } }; h.fill = XL.headFill; h.alignment = { vertical: "middle" }; });
+  out.getColumn(fc).width = 14; out.getColumn(wc).width = 70;
+  for (const [row, list] of res.byRow) {
+    const r = out.getRow(row);
+    for (let c = 1; c <= lastCol; c++) r.getCell(c).fill = FLAG_FILL;
+    const f = r.getCell(fc), w = r.getCell(wc);
+    f.value = list.map((x) => x.id).join(", "); w.value = list.map((x) => `${x.id} ${x.issue}`).join("; ");
+    [f, w].forEach((cell) => { cell.fill = FLAG_FILL; cell.font = { name: "Century Gothic", size: 10, bold: true, color: { argb: "FF7A4520" } }; cell.alignment = { vertical: "top", wrapText: true }; });
+  }
+}
 async function downloadReview() {
   const btn = $("#dlReview"); btn.disabled = true; const old = btn.textContent; btn.textContent = "Building the workbook";
   try {
@@ -1032,12 +1069,7 @@ async function downloadReview() {
       f.map((x) => [x[0], xlDate(x[1]), x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10], x[11], x[12], x[13], "", "Open"]),
       [10, 12, 18, 42, 18, 30, 12, 12, 11, 20, 8, 9, 34, 60, 30, 9], { money: [6, 7, 8], wrap: [3, 12, 13, 14] });
     f.forEach((x, i) => { if (x[11] === "High") dc.getCell(i + 2, 12).fill = XL.highFill; dc.getCell(i + 2, 16).dataValidation = { type: "list", allowBlank: false, formulae: ['"Open,Closed"'] }; });
-    const fg = wb.addWorksheet("Full General Ledger");
-    const hdr = res.hdr; const moneyCols = ["debit", "credit", "running balance", "gst", "tax", "gross"].map((h) => hdr.findIndex((x) => x.toLowerCase() === h)).filter((i) => i >= 0).map((i) => i + 2);
-    sheetTable(fg, ["Source Row", "Account", ...hdr, "Rule ID", "Discrepancy", "Action Required"],
-      res.tx.map((t) => { const a = res.byRow.get(t.row) || []; return [t.row, t.acc, ...hdr.map((_, i) => (i === res.col.Date ? xlDate(t.v[i]) : t.v[i] ?? "")), a.map((x) => x.id).join("; "), a.map((x) => x.issue).join("; "), a.map((x) => x.action).join("; ")]; }),
-      [10, 30, ...hdr.map((h) => (/description/i.test(h) ? 42 : /account/i.test(h) ? 28 : 14)), 12, 40, 60], { money: moneyCols });
-    res.tx.forEach((t, i) => { if (res.byRow.has(t.row)) fg.getRow(i + 2).eachCell({ includeEmpty: true }, (c) => { c.fill = XL.flagFill; }); });
+    copyLedger(wb, sheet, res);
     await saveWorkbook(wb, $("#outName").value);
   } catch (e) { say($("#reviewMsg"), "The workbook couldn't be built: " + esc(e.message), "err"); }
   btn.disabled = false; btn.textContent = old;
